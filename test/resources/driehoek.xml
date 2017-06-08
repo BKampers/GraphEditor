@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.8.0_45" class="java.beans.XMLDecoder">
+ <object class="java.util.ArrayList">
+  <void method="add">
+   <object class="bka.graph.document.DiagramPage">
+    <void property="edges">
+     <object class="java.util.ArrayList">
+      <void method="add">
+       <object class="bka.graph.swing.EdgePicture" id="EdgePicture0">
+        <void property="XPoints">
+         <void index="0">
+          <int>304</int>
+         </void>
+         <void index="1">
+          <int>342</int>
+         </void>
+        </void>
+        <void property="YPoints">
+         <void index="0">
+          <int>177</int>
+         </void>
+         <void index="1">
+          <int>79</int>
+         </void>
+        </void>
+        <void property="edge">
+         <object class="bka.graph.Edge">
+          <void property="origin">
+           <object class="bka.graph.Vertex" id="Vertex0"/>
+          </void>
+          <void property="terminus">
+           <object class="bka.graph.Vertex" id="Vertex1"/>
+          </void>
+         </object>
+        </void>
+        <void property="originPicture">
+         <object class="bka.graph.swing.VertexPicture" id="VertexPicture0">
+          <void property="location">
+           <object class="java.awt.Point" id="Point0">
+            <void class="java.awt.Point" method="getField">
+             <string>x</string>
+             <void method="set">
+              <object idref="Point0"/>
+              <int>304</int>
+             </void>
+            </void>
+            <void class="java.awt.Point" method="getField">
+             <string>y</string>
+             <void method="set">
+              <object idref="Point0"/>
+              <int>177</int>
+             </void>
+            </void>
+           </object>
+          </void>
+          <void property="vertex">
+           <object idref="Vertex0"/>
+          </void>
+         </object>
+        </void>
+        <void property="terminusPicture">
+         <object class="bka.graph.swing.VertexPicture" id="VertexPicture1">
+          <void property="location">
+           <object class="java.awt.Point" id="Point1">
+            <void class="java.awt.Point" method="getField">
+             <string>x</string>
+             <void method="set">
+              <object idref="Point1"/>
+              <int>342</int>
+             </void>
+            </void>
+            <void class="java.awt.Point" method="getField">
+             <string>y</string>
+             <void method="set">
+              <object idref="Point1"/>
+              <int>79</int>
+             </void>
+            </void>
+           </object>
+          </void>
+          <void id="Dimension0" property="size">
+           <void class="java.awt.Dimension" method="getField">
+            <string>width</string>
+            <void method="set">
+             <object idref="Dimension0"/>
+             <int>60</int>
+            </void>
+           </void>
+           <void class="java.awt.Dimension" method="getField">
+            <string>height</string>
+            <void method="set">
+             <object idref="Dimension0"/>
+             <int>28</int>
+            </void>
+           </void>
+          </void>
+          <void property="vertex">
+           <object idref="Vertex1"/>
+          </void>
+         </object>
+        </void>
+       </object>
+      </void>
+      <void method="add">
+       <object class="bka.graph.swing.EdgePicture" id="EdgePicture1">
+        <void property="XPoints">
+         <void index="0">
+          <int>102</int>
+         </void>
+         <void index="1">
+          <int>342</int>
+         </void>
+        </void>
+        <void property="YPoints">
+         <void index="0">
+          <int>107</int>
+         </void>
+         <void index="1">
+          <int>79</int>
+         </void>
+        </void>
+        <void property="edge">
+         <object class="bka.graph.Edge">
+          <void property="origin">
+           <object class="bka.graph.Vertex" id="Vertex2"/>
+          </void>
+          <void property="terminus">
+           <object idref="Vertex1"/>
+          </void>
+         </object>
+        </void>
+        <void property="originPicture">
+         <object class="bka.graph.swing.VertexPicture" id="VertexPicture2">
+          <void property="location">
+           <object class="java.awt.Point" id="Point2">
+            <void class="java.awt.Point" method="getField">
+             <string>x</string>
+             <void method="set">
+              <object idref="Point2"/>
+              <int>102</int>
+             </void>
+            </void>
+            <void class="java.awt.Point" method="getField">
+             <string>y</string>
+             <void method="set">
+              <object idref="Point2"/>
+              <int>107</int>
+             </void>
+            </void>
+           </object>
+          </void>
+          <void property="vertex">
+           <object idref="Vertex2"/>
+          </void>
+         </object>
+        </void>
+        <void property="terminusPicture">
+         <object idref="VertexPicture1"/>
+        </void>
+       </object>
+      </void>
+      <void method="add">
+       <object class="bka.graph.swing.EdgePicture" id="EdgePicture2">
+        <void property="XPoints">
+         <void index="0">
+          <int>102</int>
+         </void>
+         <void index="1">
+          <int>304</int>
+         </void>
+        </void>
+        <void property="YPoints">
+         <void index="0">
+          <int>107</int>
+         </void>
+         <void index="1">
+          <int>177</int>
+         </void>
+        </void>
+        <void property="edge">
+         <object class="bka.graph.Edge">
+          <void property="origin">
+           <object idref="Vertex2"/>
+          </void>
+          <void property="terminus">
+           <object idref="Vertex0"/>
+          </void>
+         </object>
+        </void>
+        <void property="originPicture">
+         <object idref="VertexPicture2"/>
+        </void>
+        <void property="terminusPicture">
+         <object idref="VertexPicture0"/>
+        </void>
+       </object>
+      </void>
+     </object>
+    </void>
+    <void property="vertices">
+     <object class="java.util.ArrayList">
+      <void method="add">
+       <object idref="VertexPicture2"/>
+      </void>
+      <void method="add">
+       <object idref="VertexPicture0"/>
+      </void>
+      <void method="add">
+       <object idref="VertexPicture1"/>
+      </void>
+     </object>
+    </void>
+   </object>
+  </void>
+ </object>
+ <int>0</int>
+ <object class="java.util.HashMap">
+  <void method="put">
+   <object idref="EdgePicture2"/>
+   <object class="bka.awt.DrawStyle" id="DrawStyle0">
+    <void id="HashMap0" property="paints">
+     <void method="put">
+      <string>DRAW</string>
+      <object class="java.awt.Color">
+       <int>255</int>
+       <int>102</int>
+       <int>102</int>
+       <int>255</int>
+      </object>
+     </void>
+    </void>
+    <void property="paints">
+     <object idref="HashMap0"/>
+    </void>
+    <void id="HashMap1" property="strokes">
+     <void method="put">
+      <string>DRAW</string>
+      <object class="java.awt.BasicStroke" id="BasicStroke0">
+       <float>1.0</float>
+       <int>2</int>
+       <int>0</int>
+       <float>10.0</float>
+       <null/>
+       <float>0.0</float>
+      </object>
+     </void>
+    </void>
+    <void property="strokes">
+     <object idref="HashMap1"/>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <object class="bka.graph.swing.EdgePicture" id="EdgePicture3">
+    <void property="XPoints">
+     <void index="0">
+      <int>342</int>
+     </void>
+     <void index="1">
+      <int>102</int>
+     </void>
+    </void>
+    <void property="YPoints">
+     <void index="0">
+      <int>79</int>
+     </void>
+     <void index="1">
+      <int>107</int>
+     </void>
+    </void>
+    <void property="edge">
+     <object class="bka.graph.Edge">
+      <void property="origin">
+       <object idref="Vertex1"/>
+      </void>
+      <void property="terminus">
+       <object idref="Vertex2"/>
+      </void>
+     </object>
+    </void>
+    <void property="originPicture">
+     <object idref="VertexPicture1"/>
+    </void>
+    <void property="terminusPicture">
+     <object idref="VertexPicture2"/>
+    </void>
+   </object>
+   <object class="bka.awt.DrawStyle"/>
+  </void>
+  <void method="put">
+   <object idref="EdgePicture1"/>
+   <object class="bka.awt.DrawStyle" id="DrawStyle1">
+    <void id="HashMap2" property="paints">
+     <void method="put">
+      <string>DRAW</string>
+      <object class="java.awt.Color">
+       <int>0</int>
+       <int>204</int>
+       <int>0</int>
+       <int>255</int>
+      </object>
+     </void>
+    </void>
+    <void property="paints">
+     <object idref="HashMap2"/>
+    </void>
+    <void id="HashMap3" property="strokes">
+     <void method="put">
+      <string>DRAW</string>
+      <object idref="BasicStroke0"/>
+     </void>
+    </void>
+    <void property="strokes">
+     <object idref="HashMap3"/>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <object class="bka.graph.swing.EdgePicture" id="EdgePicture4">
+    <void property="XPoints">
+     <void index="0">
+      <int>102</int>
+     </void>
+     <void index="1">
+      <int>304</int>
+     </void>
+    </void>
+    <void property="YPoints">
+     <void index="0">
+      <int>107</int>
+     </void>
+     <void index="1">
+      <int>177</int>
+     </void>
+    </void>
+    <void property="edge">
+     <object class="bka.graph.Edge">
+      <void property="origin">
+       <object idref="Vertex2"/>
+      </void>
+      <void property="terminus">
+       <object idref="Vertex0"/>
+      </void>
+     </object>
+    </void>
+    <void property="originPicture">
+     <object idref="VertexPicture2"/>
+    </void>
+    <void property="terminusPicture">
+     <object idref="VertexPicture0"/>
+    </void>
+   </object>
+   <object class="bka.awt.DrawStyle"/>
+  </void>
+ </object>
+</java>

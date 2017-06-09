@@ -5,7 +5,6 @@
 package bka.graph.swing;
 
 
-import bka.awt.*;
 import bka.graph.*;
 import java.awt.*;
 import java.awt.geom.*;
@@ -336,12 +335,11 @@ public class EdgePicture extends AbstractPicture {
 
 
     @Override
-    protected void paintShape(Graphics2D g2d, DrawStyle drawStyle) {
-        Paint drawPaint = drawStyle.getPaint(DRAW);
+    protected void paintShape(Graphics2D g2d) {
+        Paint drawPaint = getPaint(DRAW);
         if (drawPaint != null) {
             g2d.setPaint(drawPaint);
-            Stroke stroke = drawStyle.getStroke(DRAW);
-            g2d.setStroke((stroke != null) ? stroke : DEFAULT_STROKE);
+            g2d.setStroke(getStroke(DRAW));
             g2d.draw(getShape());
         }
         if (edge == null || edge.isDirected()) {
@@ -349,8 +347,7 @@ public class EdgePicture extends AbstractPicture {
             double angle = angle(index);
             Point location = arrowheadLocation();
             if (location != null) {
-                DrawStyle style = DrawStyleManager.getInstance().getDrawStyle(this);
-                g2d.setStroke(style.getStroke(ARROW_HEAD));
+                g2d.setStroke(getStroke(ARROW_HEAD));
                 g2d.translate(location.x, location.y);
                 g2d.rotate(angle);
                 paintArrowhead(g2d);

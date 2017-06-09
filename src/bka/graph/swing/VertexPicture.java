@@ -4,7 +4,6 @@
 
 package bka.graph.swing;
 
-import bka.awt.*;
 import bka.graph.Vertex;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -156,17 +155,16 @@ public class VertexPicture extends AbstractPicture {
     
 
     @Override
-    protected void paintShape(Graphics2D g2d, DrawStyle drawStyle) {
-        Paint fillPaint = drawStyle.getPaint(FILL);
+    protected void paintShape(Graphics2D g2d) {
+        Paint fillPaint = getPaint(FILL);
         if (fillPaint != null) {
             g2d.setPaint(fillPaint);
             g2d.fill(getShape());
         }
-        Paint drawPaint = drawStyle.getPaint(DRAW);
+        Paint drawPaint = getPaint(DRAW);
         if (drawPaint != null) {
             g2d.setPaint(drawPaint);
-            Stroke stroke = drawStyle.getStroke(DRAW);
-            g2d.setStroke((stroke != null) ? stroke : DEFAULT_STROKE);
+            g2d.setStroke(getStroke(DRAW));
             g2d.draw(getShape());
         }
     }

@@ -359,7 +359,6 @@ public class EdgePicture extends AbstractPicture {
             g2d.setColor(Color.BLACK);
             g2d.drawOval(xPoints[hoverIndex] - 2, yPoints[hoverIndex] - 2, 5, 5);
         }
-        paintText(g2d);
     }
 
 
@@ -396,7 +395,8 @@ public class EdgePicture extends AbstractPicture {
     }
 
 
-    private void paintText(Graphics2D g2d) {
+    @Override
+    protected void paintText(Graphics2D g2d) {
         String text = getText();
         if (text != null && ! text.isEmpty()) {
             int left = Math.min(xPoints[0], xPoints[xPoints.length - 1]);

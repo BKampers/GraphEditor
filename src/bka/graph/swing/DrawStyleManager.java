@@ -64,6 +64,10 @@ public class DrawStyleManager {
     }
 
 
+    private DrawStyleManager() {
+    }
+
+
     private final Map<Object, DrawStyle> styles = new HashMap<>();
 
 

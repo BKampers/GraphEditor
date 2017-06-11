@@ -13,11 +13,13 @@ public abstract class AbstractPicture {
 
     public static final String DRAW = "DRAW";
     public static final String FILL = "FILL";
-
+    public static final String TEXT_FOREGROUND = "TEXT_FOREGROUND";
+    public static final String TEXT_BACKGROUND = "TEXT_BACKGROUND";
 
 
     public abstract boolean isLocatedAt(Point point);
     
+    protected abstract void paintText(Graphics2D g2d);
     protected abstract void paintShape(Graphics2D g2d);
     protected abstract Shape buildShape();
 
@@ -37,6 +39,7 @@ public abstract class AbstractPicture {
 
     public final void paint(Graphics2D g2d) {
         paintShape(g2d);
+        paintText(g2d);
     }
 
 
@@ -52,7 +55,7 @@ public abstract class AbstractPicture {
     }
 
 
-    protected void clearShape() {
+    protected final void clearShape() {
         shape = null;
     }
 

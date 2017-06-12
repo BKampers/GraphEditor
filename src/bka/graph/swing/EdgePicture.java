@@ -336,7 +336,7 @@ public class EdgePicture extends AbstractPicture {
 
     @Override
     protected void paintShape(Graphics2D g2d) {
-        Paint drawPaint = getPaint(DRAW);
+        Paint drawPaint = getColor(DRAW);
         if (drawPaint != null) {
             g2d.setPaint(drawPaint);
             g2d.setStroke(getStroke(DRAW));

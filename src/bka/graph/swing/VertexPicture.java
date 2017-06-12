@@ -16,6 +16,10 @@ import javax.swing.*;
 public class VertexPicture extends AbstractPicture {
     
     
+    public static final Object FILL_COLOR_TOP = "FILL_COLOR_TOP";
+    public static final Object FILL_COLOR_BOTTOM = "FILL_COLOR_BOTTOM";
+
+
     public static final int EXTERN     = 0x00;
     public static final int NORTH      = 0x01;
     public static final int SOUTH      = 0x02;
@@ -210,14 +214,14 @@ public class VertexPicture extends AbstractPicture {
 
     @Override
     protected void paintShape(Graphics2D g2d) {
-        Paint fillPaint = getPaint(FILL);
+        Paint fillPaint = getFillPaint();
         if (fillPaint != null) {
             g2d.setPaint(fillPaint);
             g2d.fill(getShape());
         }
-        Paint drawPaint = getPaint(DRAW);
-        if (drawPaint != null) {
-            g2d.setPaint(drawPaint);
+        Color drawColor = getColor(DRAW);
+        if (drawColor != null) {
+            g2d.setPaint(drawColor);
             g2d.setStroke(getStroke(DRAW));
             g2d.draw(getShape());
         }
@@ -227,6 +231,22 @@ public class VertexPicture extends AbstractPicture {
     @Override
     protected Shape buildShape() {
         return new Ellipse2D.Float(xWest(), yNorth(), size.width, size.height);
+    }
+
+
+    protected Paint createTopBottomGradientPaint() {
+        Color topColor = (Color) getColor(FILL_COLOR_TOP);
+        Color bottomColor = (Color) getColor(FILL_COLOR_BOTTOM);
+        if (topColor == null || bottomColor == null) {
+            return getColor(FILL);
+        }
+        return new GradientPaint(location.x, yNorth(), topColor, location.x, ySouth(), bottomColor);
+
+    }
+
+
+    protected Paint getFillPaint() {
+        return getColor(FILL);
     }
 
 
@@ -303,7 +323,7 @@ public class VertexPicture extends AbstractPicture {
         if (background != null) {
             string.addAttribute(TextAttribute.BACKGROUND, background);
         }
-        Paint foreground = getPaint(TEXT_FOREGROUND);
+        Paint foreground = getColor(TEXT_FOREGROUND);
         string.addAttribute(TextAttribute.FOREGROUND, (foreground != null) ? foreground : Color.BLACK);
         if (underline) {
             string.addAttribute(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);

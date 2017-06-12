@@ -79,10 +79,10 @@ public class DiagramComponent extends JComponent {
         }
         for (Map.Entry<AbstractPicture, Collection<DrawStyle>> highlight : highlights.entrySet()) {
             for (DrawStyle style : highlight.getValue()) {
-                Paint paint = style.getPaint("BORDER");
+                Color color = style.getColor("BORDER");
                 Stroke stroke = style.getStroke("BORDER");
-                if (paint != null && stroke != null) {
-                    g2d.setPaint(paint);
+                if (color != null && stroke != null) {
+                    g2d.setPaint(color);
                     g2d.setStroke(stroke);
                     g2d.draw(highlight.getKey().getShape());
                 }

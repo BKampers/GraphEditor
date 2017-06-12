@@ -60,8 +60,8 @@ public abstract class AbstractPicture {
     }
 
 
-    protected Paint getPaint(Object key) {
-        return getDrawStyle().getPaint(key);
+    protected Color getColor(Object key) {
+        return getDrawStyle().getColor(key);
     }
 
 

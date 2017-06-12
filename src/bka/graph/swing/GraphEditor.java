@@ -67,8 +67,8 @@ public class GraphEditor extends bka.swing.FrameApplication {
     public static void main(final String[] arguments) {
         EventQueue.invokeLater(() -> {
             DrawStyle drawStyle = new DrawStyle();
-            drawStyle.setPaint(AbstractPicture.FILL, Color.BLACK);
-            drawStyle.setPaint(AbstractPicture.DRAW, Color.BLACK);
+            drawStyle.setColor(AbstractPicture.FILL, Color.BLACK);
+            drawStyle.setColor(AbstractPicture.DRAW, Color.BLACK);
             drawStyle.setStroke(AbstractPicture.DRAW, new BasicStroke());
             drawStyle.setStroke(EdgePicture.ARROW_HEAD, new BasicStroke());
             DrawStyleManager.getInstance().setDrawStyle(AbstractPicture.class, drawStyle);
@@ -533,15 +533,12 @@ public class GraphEditor extends bka.swing.FrameApplication {
         DrawStyle drawStyle = DrawStyleManager.getInstance().getDrawStyle(picture);
         Color color = null;
         if (drawStyle != null) {
-            Paint paint = drawStyle.getPaint(key);
-            if (paint instanceof Color) {
-                color = (Color) paint;
-            }
+            color = drawStyle.getColor(key);
         }
         Color newColor = JColorChooser.showDialog(this, "Pick Color", color);
-        if (color != null) {
+        if (newColor != null) {
             drawStyle = new DrawStyle(drawStyle);
-            drawStyle.setPaint(key, newColor);
+            drawStyle.setColor(key, newColor);
             DrawStyleManager.getInstance().setDrawStyle(picture, drawStyle);
         }
         selectedDiagramComponent().clearHoverInfo();

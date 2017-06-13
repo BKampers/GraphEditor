@@ -15,7 +15,7 @@ public abstract class AbstractPicture {
 
     public static final String DRAW = "DRAW";
     public static final String FILL = "FILL";
-    public static final Object TEXT = "TEXT";
+    public static final String TEXT = "TEXT";
 
 
     public abstract boolean isLocatedAt(Point point);

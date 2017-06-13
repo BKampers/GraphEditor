@@ -279,6 +279,12 @@ public class VertexPicture extends AbstractPicture {
     }
 
 
+    protected void paintText(Graphics2D g2d, String text, Point2D.Float position) {
+        paintText(g2d, text, position, getFont(TEXT));
+
+    }
+
+
     protected void paintText(Graphics2D g2d, String text, int row) {
         paintText(g2d, text, row, getFont(TEXT));
 

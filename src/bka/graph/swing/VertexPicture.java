@@ -10,6 +10,8 @@ import java.awt.font.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.text.*;
+import java.text.AttributedCharacterIterator.Attribute;
+import java.util.*;
 import javax.swing.*;
 
 
@@ -208,7 +210,7 @@ public class VertexPicture extends AbstractPicture {
 
     @Override
     protected void paintText(Graphics2D g2d) {
-        paintText(g2d, vertex.getName(), new Point2D.Float(xEast(), yNorth()));
+        paintText(g2d, vertex.getName(), new Point2D.Float(xEast(), yNorth()), getFont("TEXT"));
     }
     
 
@@ -271,67 +273,37 @@ public class VertexPicture extends AbstractPicture {
     }
     
     
-    protected void paintText(Graphics2D g2d, String text, int line) {
-        paintText(g2d, text, line, null);
-    }
-
-
-    protected void paintText(Graphics2D g2d, String text, int line, Paint background) {
-        if (text != null && ! text.isEmpty()) {
-            float x = location.x;
-            float y = yNorth() + g2d.getFontMetrics().getHeight() * line;
-            paintText(g2d, text, new Point2D.Float(x, y), background);
-        }
-    }
-
-
-    protected void paintUnderlinedText(Graphics2D g2d, String text, int line) {
-        paintUnderlinedText(g2d, text, line, null);
-    }
-
-
-    protected void paintUnderlinedText(Graphics2D g2d, String text, int line, Color background) {
-        if (text != null && ! text.isEmpty()) {
-            float x = location.x;
-            float y = yNorth() + g2d.getFontMetrics().getHeight() * line;
-            paintText(g2d, text, new Point2D.Float(x, y), true, background);
-        }
-    }
-
-
     protected void paintText(Graphics2D g2d, String text) {
-        paintText(g2d, text, new Point2D.Float(location.x, location.y));
+        paintText(g2d, text, new Point2D.Float(location.x, location.y), getFont("TEXT"));
+
     }
 
 
-    protected void paintText(Graphics2D g2d, String text, Point2D.Float textLocation) {
+    protected void paintText(Graphics2D g2d, String text, int row) {
+        paintText(g2d, text, row, getFont(TEXT));
+
+    }
+
+
+    protected void paintText(Graphics2D g2d, String text, int row, Map<? extends Attribute, ?> attributes) {
         if (text != null && ! text.isEmpty()) {
-            paintText(g2d, text, textLocation, null);
+            float x = location.x;
+            float y = yNorth() + g2d.getFontMetrics().getHeight() * row;
+            paintText(g2d, text, new Point2D.Float(x, y), attributes);
         }
     }
 
 
-    private void paintText(Graphics2D g2d, String text, Point2D.Float textLocation, Paint background) {
-        paintText(g2d, text, textLocation, false, background);
-    }
-
-
-    private void paintText(Graphics2D g2d, String text, Point2D.Float position, boolean underline, Paint background) {
-        AttributedString string = new AttributedString(text);
-        string.addAttribute(TextAttribute.FONT, g2d.getFont());
-        FontMetrics metrics = g2d.getFontMetrics();
-        if (background != null) {
-            string.addAttribute(TextAttribute.BACKGROUND, background);
+    protected void paintText(Graphics2D g2d, String text, Point2D.Float position, Map<? extends Attribute, ?> attributes) {
+        if (text != null && ! text.isEmpty()) {
+            AttributedString string = new AttributedString(text);
+            string.addAttributes(attributes, 0, text.length());
+            TextLayout layout = new TextLayout(string.getIterator(), g2d.getFontRenderContext());
+            Rectangle2D bounds = layout.getBounds();
+            float x = position.x - (float) bounds.getWidth() / 2.0f;
+            float y = position.y - (float) bounds.getCenterY() / 2.0f;
+            layout.draw(g2d, x, y);
         }
-        Paint foreground = getColor(TEXT_FOREGROUND);
-        string.addAttribute(TextAttribute.FOREGROUND, (foreground != null) ? foreground : Color.BLACK);
-        if (underline) {
-            string.addAttribute(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-        }
-        TextLayout layout = new TextLayout(string.getIterator(), g2d.getFontRenderContext());
-        float x = position.x - metrics.stringWidth(text) / 2.0f;
-        float y = position.y + metrics.getHeight() - metrics.getAscent();
-        layout.draw(g2d, x, y);
     }
 
 

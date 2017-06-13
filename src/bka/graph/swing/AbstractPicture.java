@@ -7,14 +7,15 @@ package bka.graph.swing;
 
 import bka.awt.*;
 import java.awt.*;
+import java.awt.font.*;
+import java.util.*;
 
 
 public abstract class AbstractPicture {
 
     public static final String DRAW = "DRAW";
     public static final String FILL = "FILL";
-    public static final String TEXT_FOREGROUND = "TEXT_FOREGROUND";
-    public static final String TEXT_BACKGROUND = "TEXT_BACKGROUND";
+    public static final Object TEXT = "TEXT";
 
 
     public abstract boolean isLocatedAt(Point point);
@@ -71,6 +72,12 @@ public abstract class AbstractPicture {
     }
 
 
+    protected Map<TextAttribute, Object> getFont(Object key) {
+        Map<TextAttribute, Object> font = getDrawStyle().getFont(key);
+        return (font != null) ? font : DEFAULT_FONT;
+    }
+
+
     private DrawStyle getDrawStyle() {
         return DrawStyleManager.getInstance().getDrawStyle(this);
     }
@@ -84,6 +91,7 @@ public abstract class AbstractPicture {
 
 
     protected static final Stroke DEFAULT_STROKE = new BasicStroke();
+    protected static final Map<TextAttribute, Object> DEFAULT_FONT = Collections.EMPTY_MAP;
     
     private  Shape shape;
 

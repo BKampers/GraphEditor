@@ -22,19 +22,30 @@ public class DiagramComponent extends JComponent {
         this.page = page;
         initialize();
         setTitle(page.getTitle());
-        setVertexPictures(page.getVertices());
-        setEdgePictures(page.getEdges());
+        pictures.addAll(page.getVertices());
+        pictures.addAll(page.getEdges());
     }
 
 
     public final void addVertexPicture(VertexPicture vertexPicture, Point point) {
+        addVertexPicture(vertexPicture, point, false);
+    }
+
+
+    public final void addVertexPicture(VertexPicture vertexPicture, Point point, boolean selected) {
         vertexPicture.initializeVertex();
         setVertexLocation(vertexPicture, point);
         addVertexPicture(vertexPicture);
+        if (selected) {
+            setSelected(vertexPicture);
+        }
     }
 
 
     public final void removeVertexPicture(VertexPicture vertexPicture) {
+        if (selectedPicture == vertexPicture) {
+            selectedPicture = null;
+        }
         pictures.remove(vertexPicture);
         highlights.remove(vertexPicture);
         page.remove(vertexPicture);
@@ -42,11 +53,24 @@ public class DiagramComponent extends JComponent {
 
 
     public final void addEdgePicture(EdgePicture edgePicture) {
-        int index = findInsertIndex(edgePicture);
-        pictures.add(index, edgePicture);
+        addEdgePicture(edgePicture, false);
     }
 
+
+    public final void addEdgePicture(EdgePicture edgePicture, boolean selected) {
+        int index = findInsertIndex(edgePicture);
+        page.add(edgePicture);
+        pictures.add(index, edgePicture);
+        if (selected) {
+            setSelected(edgePicture);
+        }
+    }
+
+
     public final void removeEdgePicture(EdgePicture edgePicture) {
+        if (selectedPicture == edgePicture) {
+            selectedPicture = null;
+        }
         pictures.remove(edgePicture);
         highlights.remove(edgePicture);
         page.remove(edgePicture);
@@ -421,7 +445,6 @@ public class DiagramComponent extends JComponent {
             int terminusAttachmentIndex = terminusPicture.nearestAttachmentIndex(point);
             if (! dragInfo.edge.hasOrigin(terminusPicture, terminusAttachmentIndex)) {
                 dragInfo.edge.setTerminus(terminusPicture, terminusAttachmentIndex);
-                page.add(dragInfo.edge);
                 editor.edgePictureAdded(this, dragInfo.edge);
                 return true;
             }

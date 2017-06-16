@@ -216,20 +216,20 @@
  <int>0</int>
  <object class="java.util.HashMap">
   <void method="put">
-   <object idref="EdgePicture2"/>
+   <object idref="EdgePicture1"/>
    <object class="bka.awt.DrawStyle" id="DrawStyle0">
-    <void id="HashMap0" property="paints">
+    <void id="HashMap0" property="colors">
      <void method="put">
       <string>DRAW</string>
       <object class="java.awt.Color">
-       <int>255</int>
-       <int>102</int>
-       <int>102</int>
+       <int>204</int>
+       <int>0</int>
+       <int>0</int>
        <int>255</int>
       </object>
      </void>
     </void>
-    <void property="paints">
+    <void property="colors">
      <object idref="HashMap0"/>
     </void>
     <void id="HashMap1" property="strokes">
@@ -288,20 +288,20 @@
    <object class="bka.awt.DrawStyle"/>
   </void>
   <void method="put">
-   <object idref="EdgePicture1"/>
+   <object idref="EdgePicture2"/>
    <object class="bka.awt.DrawStyle" id="DrawStyle1">
-    <void id="HashMap2" property="paints">
+    <void id="HashMap2" property="colors">
      <void method="put">
       <string>DRAW</string>
       <object class="java.awt.Color">
-       <int>0</int>
+       <int>153</int>
        <int>204</int>
        <int>0</int>
        <int>255</int>
       </object>
      </void>
     </void>
-    <void property="paints">
+    <void property="colors">
      <object idref="HashMap2"/>
     </void>
     <void id="HashMap3" property="strokes">
@@ -312,6 +312,61 @@
     </void>
     <void property="strokes">
      <object idref="HashMap3"/>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <object idref="EdgePicture0"/>
+   <object class="bka.awt.DrawStyle" id="DrawStyle2">
+    <void id="HashMap4" property="colors">
+     <void method="put">
+      <string>DRAW</string>
+      <object class="java.awt.Color">
+       <int>102</int>
+       <int>102</int>
+       <int>255</int>
+       <int>255</int>
+      </object>
+     </void>
+     <void method="put">
+      <string>FILL</string>
+      <object class="java.awt.Color">
+       <int>0</int>
+       <int>0</int>
+       <int>0</int>
+       <int>255</int>
+      </object>
+     </void>
+    </void>
+    <void property="colors">
+     <object idref="HashMap4"/>
+    </void>
+    <void id="HashMap5" property="strokes">
+     <void method="put">
+      <string>DRAW</string>
+      <object class="java.awt.BasicStroke">
+       <float>1.0</float>
+       <int>2</int>
+       <int>0</int>
+       <float>10.0</float>
+       <null/>
+       <float>0.0</float>
+      </object>
+     </void>
+     <void method="put">
+      <string>ARROW_HEAD</string>
+      <object class="java.awt.BasicStroke">
+       <float>1.0</float>
+       <int>2</int>
+       <int>0</int>
+       <float>10.0</float>
+       <null/>
+       <float>0.0</float>
+      </object>
+     </void>
+    </void>
+    <void property="strokes">
+     <object idref="HashMap5"/>
     </void>
    </object>
   </void>

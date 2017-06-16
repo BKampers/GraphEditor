@@ -6,6 +6,7 @@ package bka.graph.document;
 
 import bka.graph.swing.*;
 import java.util.*;
+import java.util.logging.*;
 
 
 public class DiagramPage {
@@ -54,7 +55,12 @@ public class DiagramPage {
     
     
     public void add(VertexPicture vertex) {
-        vertices.add(vertex);
+        if (!vertices.contains(vertex)) {
+            vertices.add(vertex);
+        }
+        else {
+            Logger.getLogger(DiagramPage.class.getName()).log(Level.WARNING, "Duplicate vertex {0}", vertex);
+        }
     }
 
 
@@ -64,7 +70,12 @@ public class DiagramPage {
 
 
     public void add(EdgePicture edge) {
-        edges.add(edge);
+        if (!edges.contains(edge)) {
+            edges.add(edge);
+        }
+        else {
+            Logger.getLogger(DiagramPage.class.getName()).log(Level.WARNING, "Duplicate edge {0}", edge);
+        }
     }
 
 

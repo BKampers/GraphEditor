@@ -97,7 +97,7 @@ public class EdgePicture extends AbstractPicture {
         
 
     public java.lang.Class edgeClass() {
-        return Edge.class;
+        return DefaultEdge.class;
     }
 
     

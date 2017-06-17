@@ -340,7 +340,12 @@ class VertexTreePanel extends javax.swing.JPanel {
             DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
             DiagramComponent diagramComponent = (DiagramComponent) parent.getUserObject();
             diagramComponent.setSelected((AbstractPicture) node.getUserObject());
-            graphEditor.setSelected((DiagramComponent) parent.getUserObject());
+            if (diagramComponent.isShowing()) {
+                diagramComponent.repaint();
+            }
+            else {
+                graphEditor.setSelected(diagramComponent);
+            }
         }
 
     };

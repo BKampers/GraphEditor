@@ -18,8 +18,8 @@ public class DiagramPage {
 
     public static DiagramPage createEmpty() {
         DiagramPage empty = new DiagramPage();
-        empty.vertices = new ArrayList<>();
-        empty.edges = new ArrayList<>();
+        empty.vertices = new LinkedHashSet<>();
+        empty.edges = new LinkedHashSet<>();
         return empty;
     }
     
@@ -40,7 +40,7 @@ public class DiagramPage {
 
     
     public void setVertices(Collection<VertexPicture> vertices) {
-        this.vertices = (vertices != null) ? new ArrayList<>(vertices) : null;
+        this.vertices = (vertices != null) ? new LinkedHashSet<>(vertices) : null;
     }
 
 
@@ -50,15 +50,12 @@ public class DiagramPage {
 
     
     public void setEdges(Collection<EdgePicture> edges) {
-        this.edges = (edges != null) ? new ArrayList<>(edges) : null;
+        this.edges = (edges != null) ? new LinkedHashSet<>(edges) : null;
     }
     
     
     public void add(VertexPicture vertex) {
-        if (!vertices.contains(vertex)) {
-            vertices.add(vertex);
-        }
-        else {
+        if (! vertices.add(vertex)) {
             Logger.getLogger(DiagramPage.class.getName()).log(Level.WARNING, "Duplicate vertex {0}", vertex);
         }
     }
@@ -70,10 +67,7 @@ public class DiagramPage {
 
 
     public void add(EdgePicture edge) {
-        if (!edges.contains(edge)) {
-            edges.add(edge);
-        }
-        else {
+        if (! edges.add(edge)) {
             Logger.getLogger(DiagramPage.class.getName()).log(Level.WARNING, "Duplicate edge {0}", edge);
         }
     }
@@ -95,7 +89,8 @@ public class DiagramPage {
 
 
     private String title;
-    private Collection<VertexPicture> vertices;
-    private Collection<EdgePicture> edges;
+    // LinkedHashSet to keep drawing order and to avoid duplicate pictures
+    private LinkedHashSet<VertexPicture> vertices;
+    private LinkedHashSet<EdgePicture> edges;
 
 }

@@ -454,7 +454,6 @@ public class DiagramComponent extends JComponent {
 
     
     private void initializeVertexDragging() {
-        assert hoverInfo != null;
         if (hoverInfo.location == VertexPicture.INTERIOR) {
             dragInfo.distance = new Point(dragInfo.vertex.getLocation().x - dragInfo.startPoint.x, dragInfo.vertex.getLocation().y - dragInfo.startPoint.y);
             ArrayList<VertexPicture> contained = allContainedVertices(dragInfo.vertex);
@@ -480,7 +479,7 @@ public class DiagramComponent extends JComponent {
         }
         repaint();
     }
-    
+
     
     private void moveDraggingVertexPicture(Point point) {
         Point containerPoint = dragInfo.vertex.getLocation();
@@ -666,8 +665,7 @@ public class DiagramComponent extends JComponent {
      * @return Top most VertexPicture with point inside.
      */
     private VertexPicture getVertexPicture(Point point) {
-        int i = pictures.size() - 1;
-        while (i >= 0) {
+        for (int i = pictures.size() - 1; i >= 0; --i) {
             AbstractPicture picture = pictures.get(i);
             if (picture instanceof VertexPicture) {
                 int location = ((VertexPicture) picture).locationOf(point);
@@ -675,7 +673,6 @@ public class DiagramComponent extends JComponent {
                     return (VertexPicture) picture;
                 }
             }
-            --i;
         }
         return null;
     }
@@ -831,19 +828,16 @@ public class DiagramComponent extends JComponent {
         
         @Override
         public void mouseReleased(MouseEvent evt) {
-            if (evt.getButton() == MouseEvent.BUTTON1) {
-                Point point = evt.getPoint();
-                if (dragInfo != null) {
-                    if (dragInfo.vertex != null) {
-                        cleanupEdges();
-                    }
-                    if (dragInfo.edge != null) {
-                        finishEdgeDragging(point);
-                    }
-                    dragInfo = null;
-                    setCursor(Cursor.DEFAULT_CURSOR);
-                    repaint(); // Selection might be changed, repaint entire diagram;
+            if (dragInfo != null && evt.getButton() == MouseEvent.BUTTON1) {
+                if (dragInfo.vertex != null) {
+                    cleanupEdges();
                 }
+                if (dragInfo.edge != null) {
+                    finishEdgeDragging(evt.getPoint());
+                }
+                dragInfo = null;
+                setCursor(Cursor.DEFAULT_CURSOR);
+                repaint(); // Selection might be changed, repaint entire diagram;
             }
         }
         

@@ -17,10 +17,6 @@ import javax.swing.*;
 
 public class VertexPicture extends AbstractPicture {
     
-    
-    public static final Object FILL_COLOR_TOP = "FILL_COLOR_TOP";
-    public static final Object FILL_COLOR_BOTTOM = "FILL_COLOR_BOTTOM";
-
 
     public static final int EXTERN     = 0x00;
     public static final int NORTH      = 0x01;
@@ -236,19 +232,21 @@ public class VertexPicture extends AbstractPicture {
     }
 
 
-    protected Paint createTopBottomGradientPaint() {
-        Color topColor = (Color) getColor(FILL_COLOR_TOP);
-        Color bottomColor = (Color) getColor(FILL_COLOR_BOTTOM);
-        if (topColor == null || bottomColor == null) {
-            return getColor(FILL);
-        }
-        return new GradientPaint(location.x, yNorth(), topColor, location.x, ySouth(), bottomColor);
-
+    @Override 
+    protected void clearShape() {
+        super.clearShape();
+        fillPaint = null;
     }
 
 
     protected Paint getFillPaint() {
-        return getColor(FILL);
+        if (fillPaint == null) {
+            fillPaint = getDrawStyle().createGradientPaint(FILL, new Rectangle2D.Float(xWest(), yNorth(), size.width, size.height));
+            if (fillPaint == null) {
+                fillPaint = getColor(FILL);
+            }
+        }
+        return fillPaint;
     }
 
 
@@ -336,6 +334,8 @@ public class VertexPicture extends AbstractPicture {
     protected Vertex vertex;
      
     protected Dimension size;
+
+    private Paint fillPaint = null;
     
     private static final int NEAR_TOLERANCE = 3;
 

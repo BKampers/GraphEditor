@@ -56,13 +56,18 @@ public abstract class AbstractPicture {
     }
 
 
-    protected final void clearShape() {
+    protected void clearShape() {
         shape = null;
     }
 
 
     protected Color getColor(Object key) {
         return getDrawStyle().getColor(key);
+    }
+
+
+    protected DrawStyle.Gradient getGradient(Object key) {
+        return getDrawStyle().getGradient(key);
     }
 
 
@@ -78,7 +83,7 @@ public abstract class AbstractPicture {
     }
 
 
-    private DrawStyle getDrawStyle() {
+    protected DrawStyle getDrawStyle() {
         return DrawStyleManager.getInstance().getDrawStyle(this);
     }
 

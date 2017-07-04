@@ -454,7 +454,7 @@ public class DiagramComponent extends JComponent {
 
     
     private void initializeVertexDragging() {
-        if (hoverInfo.location == VertexPicture.INTERIOR) {
+        if (hoverInfo != null && hoverInfo.location == VertexPicture.INTERIOR) {
             dragInfo.distance = new Point(dragInfo.vertex.getLocation().x - dragInfo.startPoint.x, dragInfo.vertex.getLocation().y - dragInfo.startPoint.y);
             ArrayList<VertexPicture> contained = allContainedVertices(dragInfo.vertex);
             ensureDrawnLast(dragInfo.vertex);

@@ -80,7 +80,7 @@ public class DiagramPage {
 
     VertexPicture findContainer(VertexPicture vertex) {
         for (VertexPicture picture : vertices) {
-            if (vertex != picture && picture.isLocatedAt(vertex.getLocation())) {
+            if (vertex != picture && picture.contains(vertex)) {
                 return picture;
             }
         }

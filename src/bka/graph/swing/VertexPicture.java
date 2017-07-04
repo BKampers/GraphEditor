@@ -118,6 +118,20 @@ public class VertexPicture extends AbstractPicture {
     }
 
 
+    /**
+     * @param picture any VertexPicture
+     * @return true if given picture is located inside this picture
+     */
+    public boolean contains(VertexPicture picture) {
+        Rectangle intersection = getRectangle().intersection(picture.getRectangle());
+        if (intersection.isEmpty()) {
+            return false;
+        }
+        int intersectionArea = intersection.width * intersection.height;
+        return picture.getArea() / 2 < intersectionArea && intersectionArea < getArea();
+    }
+
+
     // This class is public but can only initialized from within its package.
     final void initializeVertex() {
         vertex = createVertex();
@@ -318,6 +332,11 @@ public class VertexPicture extends AbstractPicture {
 
     private int resizeHeigth(Point point) {
         return Math.abs(point.y - location.y) * 2;
+    }
+
+
+    private int getArea() {
+        return size.width * size.height;
     }
 
 

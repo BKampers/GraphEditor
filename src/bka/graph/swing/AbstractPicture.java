@@ -88,6 +88,11 @@ public abstract class AbstractPicture {
     }
 
 
+    protected Rectangle getRectangle() {
+        return new Rectangle(xWest(), yNorth(), xEast() - xWest(), ySouth() - yNorth());
+    }
+
+
     protected static int squareDistance(Point p, Point q) {
         int δx = p.x - q.x;
         int δy = p.y - q.y;

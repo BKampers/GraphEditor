@@ -454,7 +454,7 @@ public class DiagramComponent extends JComponent {
 
     
     private void initializeVertexDragging() {
-        if (hoverInfo != null && hoverInfo.location == VertexPicture.INTERIOR) {
+        if (hoverInfo != null && hoverInfo.location == Location.INTERIOR) {
             dragInfo.distance = new Point(dragInfo.vertex.getLocation().x - dragInfo.startPoint.x, dragInfo.vertex.getLocation().y - dragInfo.startPoint.y);
             ArrayList<VertexPicture> contained = allContainedVertices(dragInfo.vertex);
             ensureDrawnLast(dragInfo.vertex);
@@ -466,7 +466,7 @@ public class DiagramComponent extends JComponent {
 
     
     private void dragVertex(Point point) {
-        if (hoverInfo.location == VertexPicture.INTERIOR) {
+        if (hoverInfo.location == Location.INTERIOR) {
             setCursor(Cursor.MOVE_CURSOR);
             moveDraggingVertexPicture(new Point(point.x + dragInfo.distance.x, point.y + dragInfo.distance.y));
         }
@@ -615,7 +615,7 @@ public class DiagramComponent extends JComponent {
             ((EdgePicture) hoverInfo.picture).setHoverPoint(null);
             needRepaint = true;
         }
-        int location = -1;
+        Location location = null;
         AbstractPicture picture = getEdgePicture(point);
         if (picture == null) {
             picture = getVertexPicture(point);
@@ -668,8 +668,8 @@ public class DiagramComponent extends JComponent {
         for (int i = pictures.size() - 1; i >= 0; --i) {
             AbstractPicture picture = pictures.get(i);
             if (picture instanceof VertexPicture) {
-                int location = ((VertexPicture) picture).locationOf(point);
-                if (location != VertexPicture.EXTERN) {
+                Location location = ((VertexPicture) picture).locationOf(point);
+                if (location != Location.EXTERN) {
                     return (VertexPicture) picture;
                 }
             }
@@ -743,31 +743,31 @@ public class DiagramComponent extends JComponent {
     
     private void setVertexCursor() {
         switch (hoverInfo.location) {
-            case VertexPicture.INTERIOR:
+            case INTERIOR:
                 setCursor(Cursor.HAND_CURSOR);
                 break;
-            case VertexPicture.NORTH:
+            case NORTH:
                 setCursor(Cursor.N_RESIZE_CURSOR);
                 break;
-            case VertexPicture.SOUTH :
+            case SOUTH:
                 setCursor(Cursor.S_RESIZE_CURSOR);
                 break;
-            case VertexPicture.WEST:
+            case WEST:
                 setCursor(Cursor.W_RESIZE_CURSOR);
                 break;
-            case VertexPicture.EAST:
+            case EAST:
                 setCursor(Cursor.E_RESIZE_CURSOR);
                 break;
-            case VertexPicture.NORTH_WEST:
+            case NORTH_WEST:
                 setCursor(Cursor.NW_RESIZE_CURSOR);
                 break;
-            case VertexPicture.NORTH_EAST:
+            case NORTH_EAST:
                 setCursor(Cursor.NE_RESIZE_CURSOR);
                 break;
-            case VertexPicture.SOUTH_WEST:
+            case SOUTH_WEST:
                 setCursor(Cursor.SW_RESIZE_CURSOR);
                 break;
-            case VertexPicture.SOUTH_EAST:
+            case SOUTH_EAST:
                 setCursor(Cursor.SE_RESIZE_CURSOR);
                 break;
         }
@@ -783,8 +783,8 @@ public class DiagramComponent extends JComponent {
     
     
     private class HoverInfo {
-        AbstractPicture picture = null;
-        int location = Integer.MIN_VALUE;
+        AbstractPicture picture;
+        Location location;
     }
     
     

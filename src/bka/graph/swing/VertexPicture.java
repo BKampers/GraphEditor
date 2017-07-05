@@ -16,19 +16,7 @@ import javax.swing.*;
 
 
 public class VertexPicture extends AbstractPicture {
-    
-
-    public static final int EXTERN     = 0x00;
-    public static final int NORTH      = 0x01;
-    public static final int SOUTH      = 0x02;
-    public static final int WEST       = 0x04;
-    public static final int EAST       = 0x08;
-    public static final int NORTH_WEST = NORTH | WEST;
-    public static final int NORTH_EAST = NORTH | EAST;
-    public static final int SOUTH_WEST = SOUTH | WEST;
-    public static final int SOUTH_EAST = SOUTH | EAST;
-    public static final int INTERIOR   = NORTH | SOUTH | WEST | EAST;
-    
+        
     
     public VertexPicture() {
         size = new Dimension(10, 10);
@@ -69,7 +57,7 @@ public class VertexPicture extends AbstractPicture {
     }
     
     
-    public void resize(int direction, Point point) {
+    public void resize(Location direction, Point point) {
         switch (direction) {
             case NORTH:
             case SOUTH:
@@ -89,32 +77,49 @@ public class VertexPicture extends AbstractPicture {
     }
     
     
-    public int locationOf(Point point) {
-        int loc = EXTERN;
+    public Location locationOf(Point point) {
         if (insideBounds(point)) {
-            if (point.y <= yNorth() + NEAR_TOLERANCE) {
-                loc |= NORTH;
-            }
-            else if (point.y >= ySouth() - NEAR_TOLERANCE) {
-                loc |= SOUTH;
-            }
-            if (point.x <= xWest() + NEAR_TOLERANCE) { 
-                loc |= WEST;
-            }
-            else if (point.x >= xEast() - NEAR_TOLERANCE) {
-                loc |= EAST;
-            }
-            if (loc == EXTERN) {
-                loc = INTERIOR;
+            return internalLocation(point);
+        }
+        return Location.EXTERN;
+    }
+
+
+    private Location internalLocation(Point point) {
+        Location internal = Location.INTERIOR;
+        if (point.y <= yNorth() + NEAR_TOLERANCE) {
+            internal = Location.NORTH;
+        }
+        else if (point.y >= ySouth() - NEAR_TOLERANCE) {
+            internal = Location.SOUTH;
+        }
+        if (point.x <= xWest() + NEAR_TOLERANCE) {
+            switch (internal) {
+                case NORTH:
+                    return Location.NORTH_WEST;
+                case SOUTH:
+                    return Location.SOUTH_WEST;
+                default:
+                    return Location.WEST;
             }
         }
-        return loc;
+        else if (point.x >= xEast() - NEAR_TOLERANCE) {
+            switch (internal) {
+                case NORTH:
+                    return Location.NORTH_EAST;
+                case SOUTH:
+                    return Location.SOUTH_EAST;
+                default:
+                    return Location.EAST;
+            }
+        }
+        return internal;
     }
 
     
     @Override
     public boolean isLocatedAt(Point point) {
-        return locationOf(point) != EXTERN;
+        return locationOf(point) != Location.EXTERN;
     }
 
 
@@ -226,9 +231,9 @@ public class VertexPicture extends AbstractPicture {
 
     @Override
     protected void paintShape(Graphics2D g2d) {
-        Paint fillPaint = getFillPaint();
-        if (fillPaint != null) {
-            g2d.setPaint(fillPaint);
+        Paint paint = getFillPaint();
+        if (paint != null) {
+            g2d.setPaint(paint);
             g2d.fill(getShape());
         }
         Color drawColor = getColor(DRAW);

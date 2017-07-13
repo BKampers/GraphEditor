@@ -85,38 +85,6 @@ public class VertexPicture extends AbstractPicture {
     }
 
 
-    private Location internalLocation(Point point) {
-        Location internal = Location.INTERIOR;
-        if (point.y <= yNorth() + NEAR_TOLERANCE) {
-            internal = Location.NORTH;
-        }
-        else if (point.y >= ySouth() - NEAR_TOLERANCE) {
-            internal = Location.SOUTH;
-        }
-        if (point.x <= xWest() + NEAR_TOLERANCE) {
-            switch (internal) {
-                case NORTH:
-                    return Location.NORTH_WEST;
-                case SOUTH:
-                    return Location.SOUTH_WEST;
-                default:
-                    return Location.WEST;
-            }
-        }
-        else if (point.x >= xEast() - NEAR_TOLERANCE) {
-            switch (internal) {
-                case NORTH:
-                    return Location.NORTH_EAST;
-                case SOUTH:
-                    return Location.SOUTH_EAST;
-                default:
-                    return Location.EAST;
-            }
-        }
-        return internal;
-    }
-
-    
     @Override
     public boolean isLocatedAt(Point point) {
         return locationOf(point) != Location.EXTERN;
@@ -349,6 +317,38 @@ public class VertexPicture extends AbstractPicture {
         return
             xWest() - NEAR_TOLERANCE <= point.x && point.x <= xEast() + NEAR_TOLERANCE &&
             yNorth() - NEAR_TOLERANCE <= point.y && point.y <= ySouth() + NEAR_TOLERANCE;
+    }
+
+
+    private Location internalLocation(Point point) {
+        Location internal = Location.INTERIOR;
+        if (point.y <= yNorth() + NEAR_TOLERANCE) {
+            internal = Location.NORTH;
+        }
+        else if (point.y >= ySouth() - NEAR_TOLERANCE) {
+            internal = Location.SOUTH;
+        }
+        if (point.x <= xWest() + NEAR_TOLERANCE) {
+            switch (internal) {
+                case NORTH:
+                    return Location.NORTH_WEST;
+                case SOUTH:
+                    return Location.SOUTH_WEST;
+                default:
+                    return Location.WEST;
+            }
+        }
+        else if (point.x >= xEast() - NEAR_TOLERANCE) {
+            switch (internal) {
+                case NORTH:
+                    return Location.NORTH_EAST;
+                case SOUTH:
+                    return Location.SOUTH_EAST;
+                default:
+                    return Location.EAST;
+            }
+        }
+        return internal;
     }
 
 

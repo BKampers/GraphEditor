@@ -23,14 +23,25 @@ public class EditDialog extends JDialog {
         super(owner, title, true);
         initialize(abstractEditPanel);
     }
-    
-    
+
+
+    protected EditDialog(Dialog owner, String title) {
+        super(owner, title, true);
+    }
+
+
+//    protected final void setContentPanel(AbstractEditPanel abstractEditPanel) {
+//        contentPanel = abstractEditPanel;
+//        initialize(abstractEditPanel);
+//    }
+//
+
     public void enableOkButton(boolean enabled) {
         okButton.setEnabled(enabled);
     }
 
 
-    private void initialize(AbstractEditPanel abstractEditPanel) {
+    protected final void initialize(AbstractEditPanel abstractEditPanel) {
         contentPanel = abstractEditPanel;
         contentPanel.setEditDialog(this);
         JPanel panel = new JPanel();

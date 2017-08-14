@@ -105,8 +105,8 @@ public class Book {
     }
 
 
-    public Collection<Edge> allEdges() {
-        Collection<Edge> edges = new HashSet<>(); // HashSet avoids duplicates
+    public Collection<Edge<Vertex>> allEdges() {
+        Collection<Edge<Vertex>> edges = new HashSet<>(); // HashSet avoids duplicates
         for (DiagramPage page : pages) {
             for (EdgePicture picture : page.getEdges()) {
                 edges.add(picture.getEdge());
@@ -116,8 +116,8 @@ public class Book {
     }
 
 
-    public Collection<Edge> allEdges(Class<? extends Edge> edgeClass) {
-        Collection<Edge> edges = new HashSet<>(); // HashSet avoids duplicates
+    public Collection<Edge<Vertex>> allEdges(Class<? extends Edge> edgeClass) {
+        Collection<Edge<Vertex>> edges = new HashSet<>(); // HashSet avoids duplicates
         for (DiagramPage page : pages) {
             for (EdgePicture  picture : page.getEdges()) {
                 Edge edge = picture.getEdge();
@@ -130,8 +130,8 @@ public class Book {
     }
 
 
-    public Graph graph() {
-        Graph graph = new Graph(allVertices(), allEdges());
+    public Graph<Vertex, Edge<Vertex>> graph() {
+        Graph <Vertex, Edge<Vertex>>graph = new Graph(allVertices(), allEdges());
         for (DiagramPage page : pages) {
             for (VertexPicture vertexPicture : page.getVertices()) {
                 VertexPicture container = page.findContainer(vertexPicture);

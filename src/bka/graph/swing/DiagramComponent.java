@@ -113,8 +113,8 @@ public class DiagramComponent extends JComponent {
             }
         }
         if (selectedPicture != null) {
-            g2d.setColor(new Color(0, 0, 128, 64));
-            g2d.setStroke(new BasicStroke(3.0f));
+            g2d.setColor(SELECTION_COLOR);
+            g2d.setStroke(SELECTION_STROKE);
             g2d.draw(selectedPicture.getShape());
         }
         if (attachmentPoint != null) {
@@ -164,12 +164,15 @@ public class DiagramComponent extends JComponent {
 
 
     void setHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
-       Collection<DrawStyle> pictureHighlights = highlights.get(picture);
-       if (pictureHighlights == null) {
-           pictureHighlights = new ArrayList<>();
-           highlights.put(picture, pictureHighlights);
-       }
-       pictureHighlights.add(drawStyle);
+        if (picture == null || drawStyle == null) {
+            throw new IllegalArgumentException();
+        }
+        Collection<DrawStyle> pictureHighlights = highlights.get(picture);
+        if (pictureHighlights == null) {
+            pictureHighlights = new ArrayList<>();
+            highlights.put(picture, pictureHighlights);
+        }
+        pictureHighlights.add(drawStyle);
     }
 
 
@@ -904,10 +907,13 @@ public class DiagramComponent extends JComponent {
 
     private Point attachmentPoint;
     
+    private AbstractEditPanel editPanel;
+
     private final Color attachmentPointColor = Color.RED;
     private final int attachmentPointWidth = 4;
     private final int attachmentPointHeight = 4;
-    
-    private AbstractEditPanel editPanel;
+
+    private static final Color SELECTION_COLOR = new Color(0, 0, 128, 64);
+    private static final BasicStroke SELECTION_STROKE = new BasicStroke(3.0f);
 
 }

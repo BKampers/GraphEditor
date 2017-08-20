@@ -189,11 +189,12 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
 
     protected VertexPicture getVertexPicture(Vertex vertex) {
-        DiagramComponent selected = selectedDiagramComponent();
-        assert selected != null;
-        for (VertexPicture picture : selected.getVertexPictures()) {
-            if (vertex == picture.getVertex()) {
-                return picture;
+        DiagramComponent selectedDiagram = selectedDiagramComponent();
+        if (selectedDiagram != null) {
+            for (VertexPicture picture : selectedDiagram.getVertexPictures()) {
+                if (vertex == picture.getVertex()) {
+                    return picture;
+                }
             }
         }
         return null;
@@ -253,7 +254,11 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     
     DiagramComponent selectedDiagramComponent() {
-        return diagramComponent(diagramTabbedPane.getSelectedIndex());
+        int index = diagramTabbedPane.getSelectedIndex();
+        if (index < 0) {
+            return null;
+        }
+        return diagramComponent(index);
     }
     
     

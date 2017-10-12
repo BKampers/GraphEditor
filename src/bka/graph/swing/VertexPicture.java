@@ -4,7 +4,7 @@
 
 package bka.graph.swing;
 
-import bka.graph.Vertex;
+import bka.graph.*;
 import java.awt.*;
 import java.awt.font.*;
 import java.awt.geom.*;
@@ -184,7 +184,7 @@ public class VertexPicture extends AbstractPicture {
 
 
     protected Vertex createVertex() {
-        return new Vertex();
+        return new NamedVertex();
     }
     
     

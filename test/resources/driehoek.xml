@@ -26,10 +26,10 @@
         <void property="edge">
          <object class="bka.graph.Edge">
           <void property="origin">
-           <object class="bka.graph.Vertex" id="Vertex0"/>
+           <object class="bka.graph.NamedVertex" id="Vertex0"/>
           </void>
           <void property="terminus">
-           <object class="bka.graph.Vertex" id="Vertex1"/>
+           <object class="bka.graph.NamedVertex" id="Vertex1"/>
           </void>
          </object>
         </void>
@@ -122,7 +122,7 @@
         <void property="edge">
          <object class="bka.graph.Edge">
           <void property="origin">
-           <object class="bka.graph.Vertex" id="Vertex2"/>
+           <object class="bka.graph.NamedVertex" id="Vertex2"/>
           </void>
           <void property="terminus">
            <object idref="Vertex1"/>

@@ -325,6 +325,7 @@ public class DiagramComponent extends JComponent {
         setComponentSize(vertexPicture.xEast(), vertexPicture.ySouth());
         selectedPicture = vertexPicture;
         repaint();
+        addToHistory(new VertexInsertion(vertexPicture));
         editor.vertexPictureAdded(this, vertexPicture);
     }
     
@@ -381,6 +382,21 @@ public class DiagramComponent extends JComponent {
     }
     
     
+    private void removePicture(AbstractPicture picture) {
+        if (picture instanceof VertexPicture) {
+            removeVertex((VertexPicture) selectedPicture);
+        }
+        else if (picture instanceof EdgePicture) {
+            removeEdge((EdgePicture) selectedPicture);
+        }
+        pictures.remove(picture);
+        if (picture == selectedPicture) {
+            selectedPicture = null;
+        }
+        repaint();
+    }
+
+
     private void cleanupEdges() {
         for (EdgePicture edgePicture : getEdgePictures()) {
             if (edgePicture.getOriginPicture() == dragInfo.vertex || edgePicture.getTerminusPicture() == dragInfo.vertex) {
@@ -458,13 +474,10 @@ public class DiagramComponent extends JComponent {
     
     private void initializeVertexDragging() {
         if (hoverInfo != null && hoverInfo.location == Location.INTERIOR) {
-            dragInfo.distance = new Point(dragInfo.vertex.getLocation().x - dragInfo.startPoint.x, dragInfo.vertex.getLocation().y - dragInfo.startPoint.y);
-            ArrayList<VertexPicture> contained = allContainedVertices(dragInfo.vertex);
             ensureDrawnLast(dragInfo.vertex);
-            for (VertexPicture picture : contained) {
-                ensureDrawnLast(picture);
-            }
+            dragInfo.distance = new Point(dragInfo.vertex.getLocation().x - dragInfo.startPoint.x, dragInfo.vertex.getLocation().y - dragInfo.startPoint.y);
         }
+        dragInfo.originalPicture = new VertexPicture(dragInfo.vertex);
     }
 
     
@@ -484,11 +497,16 @@ public class DiagramComponent extends JComponent {
     }
 
     
-    private void moveDraggingVertexPicture(Point point) {
+    private void moveDraggingVertexPicture(Point destination) {
         Point containerPoint = dragInfo.vertex.getLocation();
-        int δx = point.x - containerPoint.x;
-        int δy = point.y - containerPoint.y;
-        setVertexLocation(dragInfo.vertex, point);
+        int δx = destination.x - containerPoint.x;
+        int δy = destination.y - containerPoint.y;
+        setVertexLocation(dragInfo.vertex, destination);
+        moveContainedPictures(dragInfo.vertex, δx, δy);
+    }
+
+
+    private void moveContainedPictures(VertexPicture containerPicture, int δx, int δy) {
         ArrayList<VertexPicture> vertices = getVertexPictures();
         ArrayList<EdgePicture> edges = getEdgePictures();
         boolean containerPassed = false;
@@ -501,13 +519,13 @@ public class DiagramComponent extends JComponent {
                 for (EdgePicture edgePicture : edges) {
                     if (edgePicture.getOriginPicture() == vertexPicture) {
                         ArrayList containers = containerPath(edgePicture.getTerminusPicture());
-                        if (containers.contains(dragInfo.vertex)) {
+                        if (containers.contains(containerPicture)) {
                             edgePicture.move(δx, δy);
                         }
                     }
                 }
             }
-            else if (vertexPicture == dragInfo.vertex) {
+            else if (vertexPicture == containerPicture) {
                 containerPassed = true;
             }
         }
@@ -552,8 +570,8 @@ public class DiagramComponent extends JComponent {
     }
     
     
-    private void setVertexLocation(VertexPicture vertexPicture, Point point) {
-        vertexPicture.setLocation(point);
+    private void setVertexLocation(VertexPicture vertexPicture, Point location) {
+        vertexPicture.setLocation(location);
         correctEndPoints(vertexPicture);
         setComponentSize(vertexPicture.xEast(), vertexPicture.ySouth());
     }
@@ -692,6 +710,15 @@ public class DiagramComponent extends JComponent {
     
     
     private void ensureDrawnLast(VertexPicture vertexPicture) {
+        ArrayList<VertexPicture> contained = allContainedVertices(vertexPicture);
+        moveToEndOfList(vertexPicture);
+        for (VertexPicture picture : contained) {
+            moveToEndOfList(picture);
+        }
+    }
+
+
+    private void moveToEndOfList(VertexPicture vertexPicture) {
         ArrayList<AbstractPicture> picturesToMove = new ArrayList<>();
         picturesToMove.add(vertexPicture);
         for (AbstractPicture picture : pictures) {
@@ -775,13 +802,14 @@ public class DiagramComponent extends JComponent {
                 break;
         }
     }
-    
-    
+
+
     private class DragInfo {
-        VertexPicture vertex = null;
-        EdgePicture edge = null;
-        Point startPoint = null;
-        Point distance = null;
+        VertexPicture vertex;
+        VertexPicture originalPicture;
+        EdgePicture edge;
+        Point startPoint;
+        Point distance;
     }
     
     
@@ -805,6 +833,31 @@ public class DiagramComponent extends JComponent {
             }
         }
         throw new IllegalStateException("No vertex found for edge.");
+    }
+
+
+    private void addToHistory(Mutation mutation) {
+        drawHistory.add(historyIndex, mutation);
+        historyIndex++;
+    }
+
+
+    private Mutation getUndo() {
+        if (historyIndex > 0) {
+            historyIndex--;
+            return drawHistory.get(historyIndex);
+        }
+        return null;
+    }
+
+
+    private Mutation getRedo() {
+        if (historyIndex < drawHistory.size()) {
+            Mutation mutation = drawHistory.get(historyIndex);
+            historyIndex++;
+            return mutation;
+        }
+        return null;
     }
 
 
@@ -834,6 +887,7 @@ public class DiagramComponent extends JComponent {
             if (dragInfo != null && evt.getButton() == MouseEvent.BUTTON1) {
                 if (dragInfo.vertex != null) {
                     cleanupEdges();
+                    addToHistory(new VertexMutation(dragInfo.originalPicture,dragInfo.vertex));
                 }
                 if (dragInfo.edge != null) {
                     finishEdgeDragging(evt.getPoint());
@@ -880,20 +934,126 @@ public class DiagramComponent extends JComponent {
         public void keyReleased(KeyEvent evt) {
             if (evt.getKeyCode() == KeyEvent.VK_DELETE && selectedPicture != null) {
                 if (selectedPicture instanceof VertexPicture) {
-                    removeVertex((VertexPicture) selectedPicture);
+                    addToHistory(new VertexDeletion((VertexPicture) selectedPicture));
                 }
-                else if (selectedPicture instanceof EdgePicture) {
-                    removeEdge((EdgePicture) selectedPicture);
+                removePicture(selectedPicture);
+            }
+            else if (isUndo(evt)) {
+                Mutation mutation = getUndo();
+                if (mutation != null) {
+                    mutation.undo();
+                    repaint();
                 }
-                pictures.remove(selectedPicture);
-                selectedPicture = null;
-                repaint();
+            }
+            else if (isRedo(evt)) {
+                Mutation mutation = getRedo();
+                if (mutation != null) {
+                    mutation.redo();
+                    repaint();
+                }
             }
         }
+
+        private boolean isUndo(KeyEvent evt) {
+          return evt.getKeyCode() == KeyEvent.VK_Z && evt.getModifiers() == MENU_SHORTCUT_KEY_MASK;
+        }
+
+        private boolean isRedo(KeyEvent evt) {
+          return evt.getKeyCode() == KeyEvent.VK_Z && evt.getModifiers() == SHIFT_MENU_SHORTCUT_KEY_MASK;
+        }
+
+        private final int MENU_SHORTCUT_KEY_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+        private final int SHIFT_MENU_SHORTCUT_KEY_MASK = KeyEvent.SHIFT_MASK | MENU_SHORTCUT_KEY_MASK;
 
     };
 
     
+    private interface Mutation {
+        void undo();
+        void redo();
+    }
+
+
+    private class VertexInsertion implements Mutation {
+
+        VertexInsertion(VertexPicture picture) {
+            this.picture = picture;
+        }
+
+        @Override
+        public void undo() {
+            removePicture(picture);
+        }
+
+        @Override
+        public void redo() {
+            pictures.add(picture);
+            page.add(picture);
+        }
+
+        private final VertexPicture picture;
+    }
+
+
+    private class VertexMutation implements Mutation {
+        VertexMutation(VertexPicture source, VertexPicture destination) {
+            this.source = source;
+            this.destination = destination;
+        }
+
+        @Override
+        public void undo() {
+            VertexPicture copy = new VertexPicture(destination);
+            ensureDrawnLast(destination);
+            Point containerPoint = source.getLocation();
+            int δx = containerPoint.x - destination.getLocation().x;
+            int δy = containerPoint.y - destination.getLocation().y;
+            setVertexLocation(destination, containerPoint);
+            destination.setSize(source.getSize());
+            moveContainedPictures(destination, δx, δy);
+            source = copy;
+        }
+
+        @Override
+        public void redo() {
+            VertexPicture copy = new VertexPicture(destination);
+            ensureDrawnLast(destination);
+            Point containerPoint = source.getLocation();
+            int δx = destination.getLocation().x - containerPoint.x;
+            int δy = destination.getLocation().y - containerPoint.y;
+            setVertexLocation(destination, containerPoint);
+            destination.setSize(source.getSize());
+            moveContainedPictures(destination, δx, δy);
+            source = copy;
+        }
+
+        private VertexPicture source;
+        private final VertexPicture destination;
+    }
+
+
+    private class VertexDeletion implements Mutation {
+
+        VertexDeletion(VertexPicture picture) {
+            this.picture = picture;
+        }
+
+        @Override
+        public void undo() {
+            pictures.add(picture);
+            page.add(picture);
+        }
+
+        @Override
+        public void redo() {
+            removePicture(picture);
+        }
+
+        private final VertexPicture picture;
+
+    }
+
+
     private final GraphEditor editor;
     private final DiagramPage page;
     private final ArrayList<AbstractPicture> pictures = new ArrayList<>();
@@ -905,6 +1065,9 @@ public class DiagramComponent extends JComponent {
     
     private final Map<AbstractPicture, Collection<DrawStyle>> highlights = new HashMap<>();
 
+    private final LinkedList<Mutation> drawHistory = new LinkedList<>();
+    private int historyIndex;
+
     private Point attachmentPoint;
     
     private AbstractEditPanel editPanel;
@@ -915,5 +1078,6 @@ public class DiagramComponent extends JComponent {
 
     private static final Color SELECTION_COLOR = new Color(0, 0, 128, 64);
     private static final BasicStroke SELECTION_STROKE = new BasicStroke(3.0f);
+
 
 }

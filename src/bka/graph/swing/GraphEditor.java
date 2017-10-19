@@ -38,7 +38,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
     public void addVertexButton(String name, Class vertexPictureClass) {
         JToggleButton button = new JToggleButton(name);
-        button.addActionListener(PICTURE_BUTTON_LISTENER);
+        button.addActionListener(pictureButtonListener);
         vertexPictureClasses.put(button, vertexPictureClass);
         pictureButtonPanel.add(button);
     }
@@ -46,7 +46,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     public void addEdgeButton(String name, Class edgePictureClass) {
         JToggleButton button = new JToggleButton(name);
-        button.addActionListener(PICTURE_BUTTON_LISTENER);
+        button.addActionListener(pictureButtonListener);
         edgePictureClasses.put(button, edgePictureClass);
         pictureButtonPanel.add(button);        
     }
@@ -161,6 +161,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
     protected void edgePictureAdded(DiagramComponent diagramComponent, EdgePicture edgePicture) {
     }
+
 
     protected void edgePictureModified(EdgePicture edgePicture) {
     }
@@ -625,7 +626,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
 
 
-    private int indexOf (DiagramComponent diagramComponent) {
+    private int indexOf(DiagramComponent diagramComponent) {
         int count = diagramTabbedPane.getTabCount();
         for (int index = 0; index < count; ++index) {
             DiagramComponent component = diagramComponent(index);
@@ -668,9 +669,9 @@ public class GraphEditor extends bka.swing.FrameApplication {
     private JScrollPane createDiagramPane(DiagramComponent diagramComponent) {
         return new JScrollPane(diagramComponent);
     }
-    
-    
-    private final ActionListener PICTURE_BUTTON_LISTENER = new ActionListener() {
+
+
+    private class PictureButtonListener implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent evt) {
@@ -687,7 +688,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
             }
         }
         
-    };
+    }
 
 
     protected Book book;
@@ -713,15 +714,16 @@ public class GraphEditor extends bka.swing.FrameApplication {
     private javax.swing.JButton saveButton;
     // End of variables declaration//GEN-END:variables
     
-    final VertexTreePanel vertexTreePanel;
+    private final VertexTreePanel vertexTreePanel;
     
+    private final PictureButtonListener pictureButtonListener = new PictureButtonListener();
+
 
     private final Map<JToggleButton, Class> vertexPictureClasses = new HashMap<>();
     private final Map<JToggleButton, Class> edgePictureClasses = new HashMap<>();
-    
-    
+
+
     private File diagramFile;
-    
     
     private static final String XML_EXTENSION = "xml";
     private static final javax.swing.filechooser.FileNameExtensionFilter XML_FILE_FILTER = new javax.swing.filechooser.FileNameExtensionFilter("XML Graphs", XML_EXTENSION);

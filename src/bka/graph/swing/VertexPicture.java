@@ -23,6 +23,12 @@ public class VertexPicture extends AbstractPicture {
     }
 
 
+    public VertexPicture(VertexPicture other) {
+        this.location = other.location;
+        this.size = other.size;
+    }
+
+
     public Vertex getVertex() {
         return vertex;
     }

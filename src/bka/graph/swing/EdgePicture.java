@@ -8,6 +8,7 @@ package bka.graph.swing;
 import bka.graph.*;
 import java.awt.*;
 import java.awt.geom.*;
+import java.util.*;
 import java.util.logging.*;
 
 
@@ -18,8 +19,14 @@ public class EdgePicture extends AbstractPicture {
 
     public EdgePicture() {
     }
-    
-    
+
+
+    public EdgePicture(EdgePicture other) {
+        xPoints = Arrays.copyOf(other.xPoints, other.xPoints.length);
+        yPoints = Arrays.copyOf(other.yPoints, other.yPoints.length);
+    }
+
+
     public final Edge getEdge() {
         return edge;
     }
@@ -57,6 +64,7 @@ public class EdgePicture extends AbstractPicture {
     
     public final void setXPoints(int[] points) {
         xPoints = points;
+        clearShape();
     }
     
     
@@ -67,6 +75,7 @@ public class EdgePicture extends AbstractPicture {
     
     public final void setYPoints(int[] points) {
         yPoints = points;
+        clearShape();
     }
     
     

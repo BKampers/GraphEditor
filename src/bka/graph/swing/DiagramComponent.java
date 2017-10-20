@@ -152,14 +152,26 @@ public class DiagramComponent extends JComponent {
             editor.vertexPictureRemoved(vertexPicture);
             pictures.remove(edgePicture);
         }
+        pictures.remove(vertexPicture);
         page.remove(vertexPicture);
         editor.vertexPictureRemoved(vertexPicture);
+        if (vertexPicture == selectedPicture) {
+            selectedPicture = null;
+        }
+        repaint();
+        addToHistory(new VertexDeletion(vertexPicture));
     }
 
     
     void removeEdge(EdgePicture edgePicture) {
+        pictures.remove(edgePicture);
         page.remove(edgePicture);
         editor.edgePictureRemoved(edgePicture);
+        if (edgePicture == selectedPicture) {
+            selectedPicture = null;
+        }
+        repaint();
+        addToHistory(new EdgeDeletion(edgePicture));
     }
 
 
@@ -387,18 +399,6 @@ public class DiagramComponent extends JComponent {
     }
 
 
-    private void deleteVertexPicture(VertexPicture picture) {
-        removeVertex(picture);
-        removePicture(picture);
-    }
-
-
-    private void deleteEdgePicture(EdgePicture picture) {
-        removeEdge(picture);
-        removePicture(picture);
-    }
-
-
     private void removePicture(AbstractPicture picture) {
         if (picture instanceof VertexPicture) {
             removeVertex((VertexPicture) picture);
@@ -406,11 +406,6 @@ public class DiagramComponent extends JComponent {
         else if (picture instanceof EdgePicture) {
             removeEdge((EdgePicture) picture);
         }
-        pictures.remove(picture);
-        if (picture == selectedPicture) {
-            selectedPicture = null;
-        }
-        repaint();
     }
 
 
@@ -956,29 +951,19 @@ public class DiagramComponent extends JComponent {
 
         @Override
         public void keyReleased(KeyEvent evt) {
-            if (evt.getKeyCode() == KeyEvent.VK_DELETE && selectedPicture != null) {
-                if (selectedPicture instanceof VertexPicture) {
-                    addToHistory(new VertexDeletion((VertexPicture) selectedPicture));
-                }
-                else if (selectedPicture instanceof EdgePicture) {
-                    addToHistory(new EdgeDeletion((EdgePicture) selectedPicture));
-                }
-                removePicture(selectedPicture);
+            if (isDelete(evt)) {
+                deleteSelectedPicture();
             }
             else if (isUndo(evt)) {
-                Mutation mutation = getUndo();
-                if (mutation != null) {
-                    mutation.undo();
-                    repaint();
-                }
+                undoMutation();
             }
             else if (isRedo(evt)) {
-                Mutation mutation = getRedo();
-                if (mutation != null) {
-                    mutation.redo();
-                    repaint();
-                }
+                redoMutation();
             }
+        }
+
+        private boolean isDelete(KeyEvent evt) {
+            return evt.getKeyCode() == KeyEvent.VK_DELETE;
         }
 
         private boolean isUndo(KeyEvent evt) {
@@ -987,6 +972,28 @@ public class DiagramComponent extends JComponent {
 
         private boolean isRedo(KeyEvent evt) {
           return evt.getKeyCode() == KeyEvent.VK_Z && evt.getModifiers() == SHIFT_MENU_SHORTCUT_KEY_MASK;
+        }
+
+        private void deleteSelectedPicture() {
+            if (selectedPicture != null) {
+                removePicture(selectedPicture);
+            }
+        }
+
+        private void undoMutation() {
+            Mutation mutation = getUndo();
+            if (mutation != null) {
+                mutation.undo();
+                repaint();
+            }
+        }
+
+        private void redoMutation() {
+            Mutation mutation = getRedo();
+            if (mutation != null) {
+                mutation.redo();
+                repaint();
+            }
         }
 
         private final int MENU_SHORTCUT_KEY_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -1009,7 +1016,7 @@ public class DiagramComponent extends JComponent {
 
         @Override
         public void undo() {
-            removePicture(picture);
+            removeVertex(picture);
         }
 
         @Override
@@ -1068,7 +1075,7 @@ public class DiagramComponent extends JComponent {
 
         @Override
         public void redo() {
-            removePicture(picture);
+            removeVertexPicture(picture);
         }
 
         private final VertexPicture picture;
@@ -1084,7 +1091,7 @@ public class DiagramComponent extends JComponent {
 
         @Override
         public void undo() {
-            removePicture(picture);
+            removeEdgePicture(picture);
         }
 
         @Override
@@ -1141,7 +1148,7 @@ public class DiagramComponent extends JComponent {
 
         @Override
         public void redo() {
-            removePicture(picture);
+            removeEdgePicture(picture);
         }
 
         private final EdgePicture picture;

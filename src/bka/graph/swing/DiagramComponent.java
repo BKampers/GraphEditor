@@ -147,7 +147,8 @@ public class DiagramComponent extends JComponent {
 
 
     void removeVertex(VertexPicture vertexPicture) {
-        for (EdgePicture edgePicture : allEdgePictures(vertexPicture)) {
+        Collection<EdgePicture> edgePictures = allEdgePictures(vertexPicture);
+        for (EdgePicture edgePicture : edgePictures) {
             page.remove(edgePicture);
             editor.vertexPictureRemoved(vertexPicture);
             pictures.remove(edgePicture);
@@ -159,7 +160,7 @@ public class DiagramComponent extends JComponent {
             selectedPicture = null;
         }
         repaint();
-        addToHistory(new VertexDeletion(vertexPicture));
+        addToHistory(new VertexDeletion(vertexPicture, edgePictures));
     }
 
     
@@ -1064,21 +1065,30 @@ public class DiagramComponent extends JComponent {
 
     private class VertexDeletion implements Mutation {
 
-        VertexDeletion(VertexPicture picture) {
-            this.picture = picture;
+        VertexDeletion(VertexPicture vertexPicture, Collection<EdgePicture> edgePictures) {
+            this.vertexPicture = vertexPicture;
+            this.edgePictures = edgePictures;
         }
 
         @Override
         public void undo() {
-            insertVertexPicture(picture);
+            insertVertexPicture(vertexPicture);
+            for (EdgePicture edgePicture : edgePictures) {
+                pictures.add(edgePicture);
+                page.add(edgePicture);
+            }
         }
 
         @Override
         public void redo() {
-            removeVertexPicture(picture);
+            removeVertexPicture(vertexPicture);
+            for (EdgePicture edgePicture : edgePictures) {
+                removeEdgePicture(edgePicture);
+            }
         }
 
-        private final VertexPicture picture;
+        private final VertexPicture vertexPicture;
+        Collection<EdgePicture> edgePictures;
 
     }
 

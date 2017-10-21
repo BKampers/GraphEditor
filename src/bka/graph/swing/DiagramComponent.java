@@ -24,6 +24,7 @@ public class DiagramComponent extends JComponent {
         setTitle(page.getTitle());
         pictures.addAll(page.getVertices());
         pictures.addAll(page.getEdges());
+        drawHistory = new DrawHistory(this);
     }
 
 
@@ -160,7 +161,7 @@ public class DiagramComponent extends JComponent {
             selectedPicture = null;
         }
         repaint();
-        addToHistory(new VertexDeletion(vertexPicture, edgePictures));
+        drawHistory.addVertexDeletion(vertexPicture, edgePictures);
     }
 
     
@@ -172,7 +173,7 @@ public class DiagramComponent extends JComponent {
             selectedPicture = null;
         }
         repaint();
-        addToHistory(new EdgeDeletion(edgePicture));
+        drawHistory.addEdgeDeletion(edgePicture);
     }
 
 
@@ -204,6 +205,39 @@ public class DiagramComponent extends JComponent {
         for (Map.Entry<AbstractPicture, Collection<DrawStyle>> pictureHighlights : highlights.entrySet()) {
             pictureHighlights.getValue().remove(drawStyle);
        }
+    }
+    
+    
+    void insertPictures(Collection<VertexPicture> vertexPictures, Collection<EdgePicture> edgePictures) {
+        for (VertexPicture vertexPicture : vertexPictures) {
+            insertVertexPicture(vertexPicture);
+        }
+        for (EdgePicture edgePicture : edgePictures) {
+            pictures.add(edgePicture);
+            page.add(edgePicture);
+        }
+    }
+    
+    
+    void removePictures(Collection<VertexPicture> vertexPictures, Collection<EdgePicture> edgePictures) {
+        for (VertexPicture vertexPicture : vertexPictures) {
+            removeVertexPicture(vertexPicture);
+            editor.vertexPictureRemoved(vertexPicture);
+        }
+        for (EdgePicture edgePicture : edgePictures) {
+            removeEdgePicture(edgePicture);
+        }
+    }
+
+
+    void revertVertexMutation(VertexPicture source, VertexPicture destination) {
+        ensureDrawnLast(destination);
+        Point sourceLocation = source.getLocation();
+        int δx = sourceLocation.x - destination.getLocation().x;
+        int δy = sourceLocation.y - destination.getLocation().y;
+        setVertexLocation(destination, sourceLocation);
+        destination.setSize(source.getSize());
+        moveContainedPictures(destination, δx, δy);
     }
 
 
@@ -337,7 +371,7 @@ public class DiagramComponent extends JComponent {
         setComponentSize(vertexPicture.xEast(), vertexPicture.ySouth());
         selectedPicture = vertexPicture;
         repaint();
-        addToHistory(new VertexInsertion(vertexPicture));
+        drawHistory.addVertexInsertion(vertexPicture);
     }
     
     
@@ -464,7 +498,7 @@ public class DiagramComponent extends JComponent {
     private void finishEdgeDragging(Point point) {
         if (dragInfo.edge.hasDragPoint()) {
             dragInfo.edge.finishDrag();
-            addToHistory(new EdgeMutation(dragInfo.originalEdge, dragInfo.edge));
+            drawHistory.addEdgeMutation(dragInfo.originalEdge, dragInfo.edge);
         }
         else if (! finalizeNewEdge(point)) {
             pictures.remove(dragInfo.edge);
@@ -480,7 +514,7 @@ public class DiagramComponent extends JComponent {
             if (! dragInfo.edge.hasOrigin(terminusPicture, terminusAttachmentIndex)) {
                 dragInfo.edge.setTerminus(terminusPicture, terminusAttachmentIndex);
                 editor.edgePictureAdded(this, dragInfo.edge);
-                addToHistory(new EdgeInsertion(dragInfo.edge));
+                drawHistory.addEdgeInsertion(dragInfo.edge);
                 return true;
             }
         }
@@ -853,34 +887,6 @@ public class DiagramComponent extends JComponent {
     }
 
 
-    private void addToHistory(Mutation mutation) {
-        while (historyIndex < drawHistory.size()) {
-            drawHistory.removeLast();
-        }
-        drawHistory.add(mutation);
-        historyIndex++;
-    }
-
-
-    private Mutation getUndo() {
-        if (historyIndex > 0) {
-            historyIndex--;
-            return drawHistory.get(historyIndex);
-        }
-        return null;
-    }
-
-
-    private Mutation getRedo() {
-        if (historyIndex < drawHistory.size()) {
-            Mutation mutation = drawHistory.get(historyIndex);
-            historyIndex++;
-            return mutation;
-        }
-        return null;
-    }
-
-
     private final MouseAdapter MOUSE_ADAPTER = new MouseAdapter() {
 
         @Override
@@ -907,7 +913,7 @@ public class DiagramComponent extends JComponent {
             if (dragInfo != null && evt.getButton() == MouseEvent.BUTTON1) {
                 if (dragInfo.vertex != null) {
                     cleanupEdges();
-                    addToHistory(new VertexMutation(dragInfo.originalvertex,dragInfo.vertex));
+                    drawHistory.addVertexMutation(dragInfo.originalvertex, dragInfo.vertex);
                 }
                 if (dragInfo.edge != null) {
                     finishEdgeDragging(evt.getPoint());
@@ -952,27 +958,15 @@ public class DiagramComponent extends JComponent {
 
         @Override
         public void keyReleased(KeyEvent evt) {
-            if (isDelete(evt)) {
+            if (keyboard.isDelete(evt)) {
                 deleteSelectedPicture();
             }
-            else if (isUndo(evt)) {
+            else if (keyboard.isUndo(evt)) {
                 undoMutation();
             }
-            else if (isRedo(evt)) {
+            else if (keyboard.isRedo(evt)) {
                 redoMutation();
             }
-        }
-
-        private boolean isDelete(KeyEvent evt) {
-            return evt.getKeyCode() == KeyEvent.VK_DELETE;
-        }
-
-        private boolean isUndo(KeyEvent evt) {
-          return evt.getKeyCode() == KeyEvent.VK_Z && evt.getModifiers() == MENU_SHORTCUT_KEY_MASK;
-        }
-
-        private boolean isRedo(KeyEvent evt) {
-          return evt.getKeyCode() == KeyEvent.VK_Z && evt.getModifiers() == SHIFT_MENU_SHORTCUT_KEY_MASK;
         }
 
         private void deleteSelectedPicture() {
@@ -982,7 +976,7 @@ public class DiagramComponent extends JComponent {
         }
 
         private void undoMutation() {
-            Mutation mutation = getUndo();
+            Mutation mutation = drawHistory.getUndo();
             if (mutation != null) {
                 mutation.undo();
                 repaint();
@@ -990,182 +984,18 @@ public class DiagramComponent extends JComponent {
         }
 
         private void redoMutation() {
-            Mutation mutation = getRedo();
+            Mutation mutation = drawHistory.getRedo();
             if (mutation != null) {
                 mutation.redo();
                 repaint();
             }
         }
 
-        private final int MENU_SHORTCUT_KEY_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-        private final int SHIFT_MENU_SHORTCUT_KEY_MASK = KeyEvent.SHIFT_MASK | MENU_SHORTCUT_KEY_MASK;
+        private final Keyboard keyboard = Keyboard.getInstance();
 
     };
 
     
-    private interface Mutation {
-        void undo();
-        void redo();
-    }
-
-
-    private class VertexInsertion implements Mutation {
-
-        VertexInsertion(VertexPicture picture) {
-            this.picture = picture;
-        }
-
-        @Override
-        public void undo() {
-            removeVertex(picture);
-        }
-
-        @Override
-        public void redo() {
-            insertVertexPicture(picture);
-        }
-
-        private final VertexPicture picture;
-    }
-
-
-    private class VertexMutation implements Mutation {
-
-        VertexMutation(VertexPicture source, VertexPicture destination) {
-            this.source = source;
-            this.destination = destination;
-        }
-
-        @Override
-        public void undo() {
-            revertMutation();
-        }
-
-        @Override
-        public void redo() {
-            revertMutation();
-        }
-
-        private void revertMutation() {
-            VertexPicture copy = new VertexPicture(destination);
-            ensureDrawnLast(destination);
-            Point containerPoint = source.getLocation();
-            int δx = containerPoint.x - destination.getLocation().x;
-            int δy = containerPoint.y - destination.getLocation().y;
-            setVertexLocation(destination, containerPoint);
-            destination.setSize(source.getSize());
-            moveContainedPictures(destination, δx, δy);
-            source = copy;
-        }
-
-        private VertexPicture source;
-        private final VertexPicture destination;
-    }
-
-
-    private class VertexDeletion implements Mutation {
-
-        VertexDeletion(VertexPicture vertexPicture, Collection<EdgePicture> edgePictures) {
-            this.vertexPicture = vertexPicture;
-            this.edgePictures = edgePictures;
-        }
-
-        @Override
-        public void undo() {
-            insertVertexPicture(vertexPicture);
-            for (EdgePicture edgePicture : edgePictures) {
-                pictures.add(edgePicture);
-                page.add(edgePicture);
-            }
-        }
-
-        @Override
-        public void redo() {
-            removeVertexPicture(vertexPicture);
-            for (EdgePicture edgePicture : edgePictures) {
-                removeEdgePicture(edgePicture);
-            }
-        }
-
-        private final VertexPicture vertexPicture;
-        Collection<EdgePicture> edgePictures;
-
-    }
-
-
-    private class EdgeInsertion implements Mutation {
-
-        EdgeInsertion(EdgePicture picture) {
-            this.picture = picture;
-        }
-
-        @Override
-        public void undo() {
-            removeEdgePicture(picture);
-        }
-
-        @Override
-        public void redo() {
-            pictures.add(picture);
-            page.add(picture);
-        }
-
-        private final EdgePicture picture;
-    }
-
-
-    private class EdgeMutation implements Mutation {
-
-        public EdgeMutation(EdgePicture source, EdgePicture destination) {
-            this.source = source;
-            this.destination = destination;
-        }
-
-        @Override
-        public void undo() {
-            revert();
-        }
-
-        @Override
-        public void redo() {
-            revert();
-        }
-
-        private void revert() {
-            EdgePicture copy = new EdgePicture(destination);
-            destination.setXPoints(source.getXPoints());
-            destination.setYPoints(source.getYPoints());
-            source = copy;
-        }
-
-        private EdgePicture source;
-        private final EdgePicture destination;
-
-    }
-
-
-    private class EdgeDeletion implements Mutation {
-
-        EdgeDeletion(EdgePicture picture) {
-            this.picture = picture;
-        }
-
-        @Override
-        public void undo() {
-            pictures.add(picture);
-            page.add(picture);
-        }
-
-        @Override
-        public void redo() {
-            removeEdgePicture(picture);
-        }
-
-        private final EdgePicture picture;
-
-    }
-
-
     private final GraphEditor editor;
     private final DiagramPage page;
     private final ArrayList<AbstractPicture> pictures = new ArrayList<>();
@@ -1177,12 +1007,11 @@ public class DiagramComponent extends JComponent {
     
     private final Map<AbstractPicture, Collection<DrawStyle>> highlights = new HashMap<>();
 
-    private final LinkedList<Mutation> drawHistory = new LinkedList<>();
-    private int historyIndex;
-
     private Point attachmentPoint;
     
     private AbstractEditPanel editPanel;
+
+    private final DrawHistory drawHistory;
 
     private final Color attachmentPointColor = Color.RED;
     private final int attachmentPointWidth = 4;

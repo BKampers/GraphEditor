@@ -6,6 +6,7 @@
 package bka.graph.swing;
 
 
+import bka.awt.*;
 import bka.graph.Vertex;
 import java.awt.*;
 import java.awt.event.*;
@@ -355,7 +356,7 @@ class VertexTreePanel extends javax.swing.JPanel {
 
         @Override
         public void keyReleased(KeyEvent evt) {
-            if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
+            if (keyboard.isDelete(evt)) {
                 DefaultMutableTreeNode node = getSelectedNode();
                 if (node.getUserObject() instanceof VertexPicture) {
                     DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
@@ -364,6 +365,9 @@ class VertexTreePanel extends javax.swing.JPanel {
                 }
             }
         }
+
+        private final Keyboard keyboard = Keyboard.getInstance();
+
     };
 
 

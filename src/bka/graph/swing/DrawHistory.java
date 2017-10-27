@@ -10,8 +10,37 @@ import java.util.*;
 class DrawHistory {
 
 
+    interface Listener {
+        void historyChanged(DrawHistory history);
+    }
+
+
     DrawHistory(DiagramComponent diagramComponent) {
         this.diagramComponent = diagramComponent;
+    }
+
+
+    void addListener(Listener listener) {
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
+    }
+
+
+    void removeListener(Listener listener) {
+        synchronized (listeners) {
+            listeners.remove(listener);
+        }
+    }
+
+
+    List<Mutation> getMutattions() {
+        return Collections.unmodifiableList(history);
+    }
+
+
+    int getIndex() {
+        return index;
     }
 
 
@@ -48,6 +77,7 @@ class DrawHistory {
     Mutation getUndo() {
         if (index > 0) {
             index--;
+            notifyListeners();
             return history.get(index);
         }
         return null;
@@ -58,6 +88,7 @@ class DrawHistory {
         if (index < history.size()) {
             Mutation mutation = history.get(index);
             index++;
+            notifyListeners();
             return mutation;
         }
         return null;
@@ -70,6 +101,16 @@ class DrawHistory {
         }
         history.add(mutation);
         index++;
+        notifyListeners();
+    }
+
+
+    private void notifyListeners() {
+        synchronized (listeners) {
+            for (Listener listener : listeners) {
+                listener.historyChanged(DrawHistory.this);
+            }
+        }
     }
 
 
@@ -186,6 +227,7 @@ class DrawHistory {
 
     private final DiagramComponent diagramComponent;
     private final LinkedList<Mutation> history = new LinkedList<>();
+    private final Collection<Listener> listeners = new ArrayList<>();
 
     private int index;
 

@@ -123,6 +123,11 @@ public class DiagramComponent extends JComponent {
             g2d.fillOval(attachmentPoint.x - attachmentPointWidth / 2, attachmentPoint.y - attachmentPointHeight / 2, attachmentPointWidth, attachmentPointHeight);
         }
     }
+
+
+    DrawHistory getDrawHistory() {
+        return drawHistory;
+    }
     
     
     boolean contains(AbstractPicture picture) {

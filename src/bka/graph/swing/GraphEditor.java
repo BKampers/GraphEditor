@@ -5,14 +5,15 @@
 package bka.graph.swing;
 
 import bka.awt.*;
-import bka.graph.document.*;
 import bka.graph.*;
+import bka.graph.document.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 import javax.swing.*;
+import javax.swing.event.*;
 
 
 public class GraphEditor extends bka.swing.FrameApplication {
@@ -27,7 +28,10 @@ public class GraphEditor extends bka.swing.FrameApplication {
         initComponents();
         addGraphButtons();
         vertexTreePanel = new VertexTreePanel(this);
+        historyPanel = new HistoryPanel();
         diagramSplitPane.setLeftComponent(vertexTreePanel);
+        diagramTabbedPane.addChangeListener(new DiagramTabChangeListener());
+        documentPanelPanel.add(historyPanel);
     }
 
 
@@ -141,7 +145,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     
     protected void vertexPictureAdded(DiagramComponent diagramComponent, VertexPicture vertexPicture) {
-        vertexTreePanel.vertexAdded(vertexPicture, selectedDiagramComponent());
+        vertexTreePanel.vertexAdded(vertexPicture, getSelectedDiagramComponent());
     }
     
     
@@ -172,27 +176,24 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
 
     protected void setHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
-        DiagramComponent selected = selectedDiagramComponent();
-        selected.setHighlighted(picture, drawStyle);
+        getSelectedDiagramComponent().setHighlighted(picture, drawStyle);
     }
 
 
     protected void resetHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
-        DiagramComponent selected = selectedDiagramComponent();
-        selected.resetHighlighted(picture, drawStyle);
+        getSelectedDiagramComponent().resetHighlighted(picture, drawStyle);
     }
 
 
     protected void resetHighlighted(DrawStyle drawStyle) {
-        DiagramComponent selected = selectedDiagramComponent();
-        selected.resetHighlighted(drawStyle);
+        getSelectedDiagramComponent().resetHighlighted(drawStyle);
     }
 
 
     protected VertexPicture getVertexPicture(Vertex vertex) {
-        DiagramComponent selectedDiagram = selectedDiagramComponent();
-        if (selectedDiagram != null) {
-            for (VertexPicture picture : selectedDiagram.getVertexPictures()) {
+        DiagramComponent diagramComponent = getSelectedDiagramComponent();
+        if (diagramComponent != null) {
+            for (VertexPicture picture : diagramComponent.getVertexPictures()) {
                 if (vertex == picture.getVertex()) {
                     return picture;
                 }
@@ -221,16 +222,12 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
 
     protected void diagramRepaint() {
-        DiagramComponent selected = selectedDiagramComponent();
-        assert selected != null;
-        selected.repaint();
+        getSelectedDiagramComponent().repaint();
     }
     
     
     protected void clearHoverInfo() {
-        DiagramComponent selected = selectedDiagramComponent();
-        assert selected != null;
-        selected.clearHoverInfo();
+        getSelectedDiagramComponent().clearHoverInfo();
     }
 
 
@@ -254,16 +251,6 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
     
-    DiagramComponent selectedDiagramComponent() {
-        int index = diagramTabbedPane.getSelectedIndex();
-        if (index < 0) {
-            return null;
-        }
-        return diagramComponent(index);
-    }
-    
-    
-
     void setSelected(DiagramComponent diagramComponent) {
         int index = indexOf(diagramComponent);
         if (index >= 0) {
@@ -287,7 +274,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
         diagramMoveRightMenuItem = new javax.swing.JMenuItem();
         deleteDiagramMenuItem = new javax.swing.JMenuItem();
         pictureButtonPanel = new javax.swing.JPanel();
-        buttonPanel = new javax.swing.JPanel();
+        documentPanelPanel = new javax.swing.JPanel();
         newButton = new javax.swing.JButton();
         loadButton = new javax.swing.JButton();
         saveButton = new javax.swing.JButton();
@@ -340,7 +327,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
         pictureButtonPanel.setPreferredSize(new java.awt.Dimension(10, 80));
         getContentPane().add(pictureButtonPanel, java.awt.BorderLayout.NORTH);
 
-        buttonPanel.setLayout(new javax.swing.BoxLayout(buttonPanel, javax.swing.BoxLayout.Y_AXIS));
+        documentPanelPanel.setLayout(new javax.swing.BoxLayout(documentPanelPanel, javax.swing.BoxLayout.Y_AXIS));
 
         newButton.setText("New");
         newButton.setMaximumSize(new java.awt.Dimension(85, 23));
@@ -351,7 +338,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
                 newButton_actionPerformed(evt);
             }
         });
-        buttonPanel.add(newButton);
+        documentPanelPanel.add(newButton);
 
         loadButton.setText("Load");
         loadButton.setMaximumSize(new java.awt.Dimension(85, 23));
@@ -362,7 +349,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
                 loadButton_actionPerformed(evt);
             }
         });
-        buttonPanel.add(loadButton);
+        documentPanelPanel.add(loadButton);
 
         saveButton.setText("Save");
         saveButton.setMaximumSize(new java.awt.Dimension(85, 23));
@@ -373,7 +360,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
                 saveButton_actionPerformed(evt);
             }
         });
-        buttonPanel.add(saveButton);
+        documentPanelPanel.add(saveButton);
 
         saveAsButton.setText("Save as");
         saveAsButton.setMaximumSize(new java.awt.Dimension(85, 23));
@@ -384,9 +371,9 @@ public class GraphEditor extends bka.swing.FrameApplication {
                 saveAsButton_actionPerformed(evt);
             }
         });
-        buttonPanel.add(saveAsButton);
+        documentPanelPanel.add(saveAsButton);
 
-        getContentPane().add(buttonPanel, java.awt.BorderLayout.EAST);
+        getContentPane().add(documentPanelPanel, java.awt.BorderLayout.EAST);
 
         diagramSplitPane.setDividerLocation(100);
 
@@ -404,6 +391,15 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+
+    private DiagramComponent getSelectedDiagramComponent() {
+        int index = diagramTabbedPane.getSelectedIndex();
+        if (index < 0) {
+            return null;
+        }
+        return diagramComponent(index);
+    }
 
 
     private void addGraphButtons() {
@@ -517,9 +513,9 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }//GEN-LAST:event_newButton_actionPerformed
 
 
-    private void updateTabTitle(int index) {
-        DiagramComponent diagramComponent = diagramComponent(index);
-        diagramTabbedPane.setTitleAt(index, diagramComponent.getTitle());
+    private void updateTabTitle(int tabIndex) {
+        DiagramComponent diagramComponent = diagramComponent(tabIndex);
+        diagramTabbedPane.setTitleAt(tabIndex, diagramComponent.getTitle());
         vertexTreePanel.diagramModified(diagramComponent);
     }
     
@@ -547,7 +543,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
             drawStyle.setColor(key, newColor);
             DrawStyleManager.getInstance().setDrawStyle(picture, drawStyle);
         }
-        selectedDiagramComponent().clearHoverInfo();
+        getSelectedDiagramComponent().clearHoverInfo();
     }
     
 
@@ -645,12 +641,10 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     
     private DiagramComponent diagramComponent(JScrollPane pane) {
-        if (pane != null) {
-            return (DiagramComponent) pane.getViewport().getComponent(0);
-        }
-        else {
+        if (pane == null) {
             return null;
         }
+        return (DiagramComponent) pane.getViewport().getComponent(0);
     }
     
     
@@ -668,6 +662,18 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     private JScrollPane createDiagramPane(DiagramComponent diagramComponent) {
         return new JScrollPane(diagramComponent);
+    }
+
+
+    private class DiagramTabChangeListener implements ChangeListener {
+
+        @Override
+        public void stateChanged(ChangeEvent evt) {
+            DiagramComponent diagramComponent = diagramComponent(diagramTabbedPane.getSelectedIndex());
+            historyPanel.setDrawHistory(diagramComponent.getDrawHistory());
+            diagramComponent.requestFocus();
+        }
+
     }
 
 
@@ -698,13 +704,13 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel buttonPanel;
     private javax.swing.JMenuItem deleteDiagramMenuItem;
     private javax.swing.JMenuItem diagramMoveLeftMenuItem;
     private javax.swing.JMenuItem diagramMoveRightMenuItem;
     private javax.swing.JPopupMenu diagramPopupMenu;
     private javax.swing.JSplitPane diagramSplitPane;
     private javax.swing.JTabbedPane diagramTabbedPane;
+    private javax.swing.JPanel documentPanelPanel;
     private javax.swing.JButton loadButton;
     private javax.swing.JButton newButton;
     private javax.swing.JMenuItem newDiagramMenuItem;
@@ -714,7 +720,12 @@ public class GraphEditor extends bka.swing.FrameApplication {
     private javax.swing.JButton saveButton;
     // End of variables declaration//GEN-END:variables
     
+
+//    private DiagramComponent selectedDiagramComponent;
+
+
     private final VertexTreePanel vertexTreePanel;
+    private final HistoryPanel historyPanel;
     
     private final PictureButtonListener pictureButtonListener = new PictureButtonListener();
 
@@ -731,6 +742,5 @@ public class GraphEditor extends bka.swing.FrameApplication {
     private static final String DIAGRAM_FILE_PROPERTY = "DiagramFile";
     
     private static final int EDIT_MIN_WIDTH = 50;
-
 
 }

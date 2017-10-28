@@ -21,12 +21,6 @@ public class EdgePicture extends AbstractPicture {
     }
 
 
-    public EdgePicture(EdgePicture other) {
-        xPoints = Arrays.copyOf(other.xPoints, other.xPoints.length);
-        yPoints = Arrays.copyOf(other.yPoints, other.yPoints.length);
-    }
-
-
     public final Edge getEdge() {
         return edge;
     }
@@ -126,8 +120,8 @@ public class EdgePicture extends AbstractPicture {
     }
 
 
-    boolean equalsShape(EdgePicture other) {
-        return Arrays.equals(xPoints, other.xPoints) && Arrays.equals(yPoints, other.yPoints);
+    boolean equalsShape(int[] xPoints, int[] yPoints) {
+        return Arrays.equals(xPoints, this.xPoints) && Arrays.equals(yPoints, this.yPoints);
     }
 
 

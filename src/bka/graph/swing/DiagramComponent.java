@@ -235,13 +235,13 @@ public class DiagramComponent extends JComponent {
     }
 
 
-    void revertVertexMutation(VertexPicture source, VertexPicture destination) {
+    void revertVertexMutation(VertexPicture destination, Point originalLocation, Dimension originalSize) {
         ensureDrawnLast(destination);
-        Point sourceLocation = source.getLocation();
-        int δx = sourceLocation.x - destination.getLocation().x;
-        int δy = sourceLocation.y - destination.getLocation().y;
-        setVertexLocation(destination, sourceLocation);
-        destination.setSize(source.getSize());
+//        Point sourceLocation = source.getLocation();
+        int δx = originalLocation.x - destination.getLocation().x;
+        int δy = originalLocation.y - destination.getLocation().y;
+        setVertexLocation(destination, originalLocation);
+        destination.setSize(originalSize);
         moveContainedPictures(destination, δx, δy);
     }
 
@@ -473,7 +473,9 @@ public class DiagramComponent extends JComponent {
     
     private void initializeEdgeDragging() {
         if (dragInfo.edge.getTerminusPicture() != null) {
-            dragInfo.originalEdge = new EdgePicture(dragInfo.edge);
+            //dragInfo.originalEdge = new EdgePicture(dragInfo.edge);
+            dragInfo.originalXPoints = dragInfo.edge.getXPoints();
+            dragInfo.originalYPoints = dragInfo.edge.getYPoints();
             dragInfo.edge.selectDragPoint(dragInfo.startPoint);
         }
     }
@@ -502,8 +504,8 @@ public class DiagramComponent extends JComponent {
 
     private void finishVertexDragging() {
         cleanupEdges();
-        if (! dragInfo.vertex.equalsShape(dragInfo.originalvertex)) {
-            drawHistory.addVertexMutation(dragInfo.originalvertex, dragInfo.vertex);
+        if (! dragInfo.vertex.equalsShape(dragInfo.originalLocation, dragInfo.originalSize)) {
+            drawHistory.addVertexMutation(dragInfo.vertex, dragInfo.originalLocation, dragInfo.originalSize);
         }
     }
 
@@ -511,8 +513,8 @@ public class DiagramComponent extends JComponent {
     private void finishEdgeDragging(Point point) {
         if (dragInfo.edge.hasDragPoint()) {
             dragInfo.edge.finishDrag();
-            if (! dragInfo.edge.equalsShape(dragInfo.originalEdge)) {
-                drawHistory.addEdgeMutation(dragInfo.originalEdge, dragInfo.edge);
+            if (! dragInfo.edge.equalsShape(dragInfo.originalXPoints, dragInfo.originalYPoints)) {
+                drawHistory.addEdgeMutation(dragInfo.edge, dragInfo.originalXPoints, dragInfo.originalYPoints);
             }
         }
         else if (! finalizeNewEdge(point)) {
@@ -542,7 +544,9 @@ public class DiagramComponent extends JComponent {
             ensureDrawnLast(dragInfo.vertex);
             dragInfo.distance = new Point(dragInfo.vertex.getLocation().x - dragInfo.startPoint.x, dragInfo.vertex.getLocation().y - dragInfo.startPoint.y);
         }
-        dragInfo.originalvertex = new VertexPicture(dragInfo.vertex);
+//        dragInfo.originalvertex = new VertexPicture(dragInfo.vertex);
+        dragInfo.originalLocation = dragInfo.vertex.getLocation();
+        dragInfo.originalSize = dragInfo.vertex.getSize();
     }
 
     
@@ -871,9 +875,13 @@ public class DiagramComponent extends JComponent {
 
     private class DragInfo {
         VertexPicture vertex;
-        VertexPicture originalvertex;
+//        VertexPicture originalvertex;
+        Point originalLocation;
+        Dimension originalSize;
         EdgePicture edge;
-        EdgePicture originalEdge;
+//        EdgePicture originalEdge;
+        int[] originalXPoints;
+        int[] originalYPoints;
         Point startPoint;
         Point distance;
     }

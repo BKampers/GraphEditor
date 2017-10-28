@@ -4,7 +4,9 @@
 
 package bka.graph.swing;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 
 class DrawHistory {
@@ -49,8 +51,8 @@ class DrawHistory {
     }
 
 
-    void addVertexMutation(VertexPicture source, VertexPicture destination) {
-        addToHistory(new VertexMutation(source, destination));
+    void addVertexMutation(VertexPicture picture, Point originalLocation, Dimension originalSize) {
+        addToHistory(new VertexMutation(picture, originalLocation, originalSize));
     }
 
 
@@ -64,8 +66,8 @@ class DrawHistory {
     }
 
 
-    void addEdgeMutation(EdgePicture source, EdgePicture destination) {
-        addToHistory(new EdgeMutation(source, destination));
+    void addEdgeMutation(EdgePicture picture, int[] originalXPoints, int[] originalYPoints) {
+        addToHistory(new EdgeMutation(picture, originalXPoints, originalYPoints));
     }
 
 
@@ -169,9 +171,10 @@ class DrawHistory {
 
     private class VertexMutation implements Mutation {
 
-        VertexMutation(VertexPicture source, VertexPicture destination) {
-            this.source = source;
-            this.destination = destination;
+        VertexMutation(VertexPicture picture, Point originalLocation, Dimension originalSize) {
+            this.picture = picture;
+            this.originalLocation = originalLocation;
+            this.originalSize = originalSize;
         }
 
         @Override
@@ -185,21 +188,25 @@ class DrawHistory {
         }
 
         private void revertMutation() {
-            VertexPicture copy = new VertexPicture(destination);
-            diagramComponent.revertVertexMutation(source, destination);
-            source = copy;
+            Point currentLocation = picture.getLocation();
+            Dimension currentSize = picture.getSize();
+            diagramComponent.revertVertexMutation(picture, originalLocation, originalSize);
+            originalLocation = currentLocation;
+            originalSize = currentSize;
         }
 
-        private VertexPicture source;
-        private final VertexPicture destination;
+        private final VertexPicture picture;
+        private Point originalLocation;
+        private Dimension originalSize;
     }
 
 
     private class EdgeMutation implements Mutation {
 
-        public EdgeMutation(EdgePicture source, EdgePicture destination) {
-            this.source = source;
-            this.destination = destination;
+        public EdgeMutation(EdgePicture picture, int[] originalXPoints, int[] originalYPoints) {
+            this.picture = picture;
+            this.originalXPoints = originalXPoints;
+            this.originalYPoints = originalYPoints;
         }
 
         @Override
@@ -213,14 +220,17 @@ class DrawHistory {
         }
 
         private void revert() {
-            EdgePicture copy = new EdgePicture(destination);
-            destination.setXPoints(source.getXPoints());
-            destination.setYPoints(source.getYPoints());
-            source = copy;
+            int[] currentXPoints = picture.getXPoints();
+            int[] currentYPoints = picture.getYPoints();
+            picture.setXPoints(originalXPoints);
+            picture.setYPoints(originalYPoints);
+            originalXPoints = currentXPoints;
+            originalYPoints = currentYPoints;
         }
 
-        private EdgePicture source;
-        private final EdgePicture destination;
+        private final EdgePicture picture;
+        private int[] originalXPoints;
+        private int[] originalYPoints;
 
     }
 

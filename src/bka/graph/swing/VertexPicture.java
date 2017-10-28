@@ -23,12 +23,6 @@ public class VertexPicture extends AbstractPicture {
     }
 
 
-    public VertexPicture(VertexPicture other) {
-        this.location = other.location;
-        this.size = other.size;
-    }
-
-
     public Vertex getVertex() {
         return vertex;
     }
@@ -143,8 +137,8 @@ public class VertexPicture extends AbstractPicture {
     }
 
 
-    public boolean equalsShape(VertexPicture other) {
-        return Objects.equals(location, other.location) && Objects.equals(size, other.size);
+    public boolean equalsShape(Point location, Dimension size) {
+        return Objects.equals(location, this.location) && Objects.equals(size, this.size);
     }
 
 

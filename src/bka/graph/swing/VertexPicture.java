@@ -143,6 +143,11 @@ public class VertexPicture extends AbstractPicture {
     }
 
 
+    public boolean equalsShape(VertexPicture other) {
+        return Objects.equals(location, other.location) && Objects.equals(size, other.size);
+    }
+
+
     // This class is public but can only initialized from within its package.
     final void initializeVertex() {
         vertex = createVertex();

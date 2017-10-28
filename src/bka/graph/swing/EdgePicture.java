@@ -126,6 +126,11 @@ public class EdgePicture extends AbstractPicture {
     }
 
 
+    boolean equalsShape(EdgePicture other) {
+        return Arrays.equals(xPoints, other.xPoints) && Arrays.equals(yPoints, other.yPoints);
+    }
+
+
     final void setOrigin(VertexPicture originPicture, int originAttachmentIndex) {
         this.originPicture = originPicture;
         this.originAttachmentIndex = originAttachmentIndex;

@@ -498,12 +498,22 @@ public class DiagramComponent extends JComponent {
         setComponentSize(dragInfo.edge.xEast(), dragInfo.edge.ySouth());
         repaint();
     }
-    
-    
+
+
+    private void finishVertexDragging() {
+        cleanupEdges();
+        if (! dragInfo.vertex.equalsShape(dragInfo.originalvertex)) {
+            drawHistory.addVertexMutation(dragInfo.originalvertex, dragInfo.vertex);
+        }
+    }
+
+
     private void finishEdgeDragging(Point point) {
         if (dragInfo.edge.hasDragPoint()) {
             dragInfo.edge.finishDrag();
-            drawHistory.addEdgeMutation(dragInfo.originalEdge, dragInfo.edge);
+            if (! dragInfo.edge.equalsShape(dragInfo.originalEdge)) {
+                drawHistory.addEdgeMutation(dragInfo.originalEdge, dragInfo.edge);
+            }
         }
         else if (! finalizeNewEdge(point)) {
             pictures.remove(dragInfo.edge);
@@ -895,18 +905,6 @@ public class DiagramComponent extends JComponent {
     private final MouseAdapter MOUSE_ADAPTER = new MouseAdapter() {
 
         @Override
-        public void mouseClicked(MouseEvent evt) {
-            switch (evt.getButton()) {
-                case MouseEvent.BUTTON1:
-                    diagramClicked(evt.getClickCount(), evt.getPoint());
-                    break;
-                case MouseEvent.BUTTON3:
-                    popupContextMenu(evt.getPoint());
-                    break;
-            }
-        }
-        
-        @Override
         public void mousePressed(MouseEvent evt) {
             if (evt.getButton() == MouseEvent.BUTTON1) {
                 startDrag(evt.getPoint());
@@ -917,8 +915,7 @@ public class DiagramComponent extends JComponent {
         public void mouseReleased(MouseEvent evt) {
             if (dragInfo != null && evt.getButton() == MouseEvent.BUTTON1) {
                 if (dragInfo.vertex != null) {
-                    cleanupEdges();
-                    drawHistory.addVertexMutation(dragInfo.originalvertex, dragInfo.vertex);
+                    finishVertexDragging();
                 }
                 if (dragInfo.edge != null) {
                     finishEdgeDragging(evt.getPoint());
@@ -929,6 +926,18 @@ public class DiagramComponent extends JComponent {
             }
         }
         
+        @Override
+        public void mouseClicked(MouseEvent evt) {
+            switch (evt.getButton()) {
+                case MouseEvent.BUTTON1:
+                    diagramClicked(evt.getClickCount(), evt.getPoint());
+                    break;
+                case MouseEvent.BUTTON3:
+                    popupContextMenu(evt.getPoint());
+                    break;
+            }
+        }
+
         @Override
         public void mouseMoved(MouseEvent evt) {
             hoverDiagram(evt.getPoint());
@@ -1024,6 +1033,5 @@ public class DiagramComponent extends JComponent {
 
     private static final Color SELECTION_COLOR = new Color(0, 0, 128, 64);
     private static final BasicStroke SELECTION_STROKE = new BasicStroke(3.0f);
-
 
 }

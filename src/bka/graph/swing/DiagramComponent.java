@@ -392,16 +392,21 @@ public class DiagramComponent extends JComponent {
         dragInfo.startPoint = point;
         Class edgePictureClass = editor.selectedEdgePictureClass();
         if (edgePictureClass != null) {
-            prepareEdgeDragging(edgePictureClass);
+            dragInfo.edge = new EdgeDragInfo();
+            initializeNewEdgeDragging(edgePictureClass);
         }
         else {
-            dragInfo.edge = getEdgePicture(dragInfo.startPoint);
-            if (dragInfo.edge != null) {
+            EdgePicture edgePicture = getEdgePicture(dragInfo.startPoint);
+            if (edgePicture != null) {
+                dragInfo.edge = new EdgeDragInfo();
+                dragInfo.edge.picture = edgePicture;
                 initializeEdgeDragging();
             }
             else {
-                dragInfo.vertex = getVertexPicture(dragInfo.startPoint);
-                if (dragInfo.vertex != null) {
+                VertexPicture vertexPicture = getVertexPicture(dragInfo.startPoint);
+                if (vertexPicture != null) {
+                    dragInfo.vertex = new VertexDragInfo();
+                    dragInfo.vertex.picture = vertexPicture;
                     initializeVertexDragging();
                 }
             }
@@ -412,11 +417,11 @@ public class DiagramComponent extends JComponent {
     
     private void dragNewEdge(Class edgePictureClass, VertexPicture originPicture, Point point) {
         try {
-            dragInfo.edge = (EdgePicture) edgePictureClass.newInstance();
-            dragInfo.edge.setOrigin(originPicture, point);
-            dragInfo.edge.setEndPoint(point);
-            addEdgePicture(dragInfo.edge);
-            selectedPicture = dragInfo.edge;
+            dragInfo.edge.picture = (EdgePicture) edgePictureClass.newInstance();
+            dragInfo.edge.picture.setOrigin(originPicture, point);
+            dragInfo.edge.picture.setEndPoint(point);
+            addEdgePicture(dragInfo.edge.picture);
+            selectedPicture = dragInfo.edge.picture;
             repaint();
         }
         catch (IllegalAccessException | InstantiationException ex) {
@@ -451,18 +456,18 @@ public class DiagramComponent extends JComponent {
 
     private void cleanupEdges() {
         for (EdgePicture edgePicture : getEdgePictures()) {
-            if (edgePicture.getOriginPicture() == dragInfo.vertex || edgePicture.getTerminusPicture() == dragInfo.vertex) {
+            if (edgePicture.getOriginPicture() == dragInfo.vertex.picture || edgePicture.getTerminusPicture() == dragInfo.vertex.picture) {
                 edgePicture.cleanup();
             }
         }
     }
     
 
-    private void prepareEdgeDragging(Class edgePictureClass) {
+    private void initializeNewEdgeDragging(Class edgePictureClass) {
         VertexPicture vertexPicture = getVertexPicture(dragInfo.startPoint);
         if (vertexPicture != null) {
             if (dragInfo.edge != null) {
-                dragInfo.edge.setTerminus(vertexPicture, dragInfo.startPoint);
+                dragInfo.edge.picture.setTerminus(vertexPicture, dragInfo.startPoint);
             }
             else {
                 dragNewEdge(edgePictureClass, vertexPicture, dragInfo.startPoint);
@@ -472,18 +477,17 @@ public class DiagramComponent extends JComponent {
     
     
     private void initializeEdgeDragging() {
-        if (dragInfo.edge.getTerminusPicture() != null) {
-            //dragInfo.originalEdge = new EdgePicture(dragInfo.edge);
-            dragInfo.originalXPoints = dragInfo.edge.getXPoints();
-            dragInfo.originalYPoints = dragInfo.edge.getYPoints();
-            dragInfo.edge.selectDragPoint(dragInfo.startPoint);
+        if (dragInfo.edge.picture.getTerminusPicture() != null) {
+            dragInfo.edge.originalXPoints = dragInfo.edge.picture.getXPoints();
+            dragInfo.edge.originalYPoints = dragInfo.edge.picture.getYPoints();
+            dragInfo.edge.picture.selectDragPoint(dragInfo.startPoint);
         }
     }
     
     
     private void dragEdge(Point point) {
-        if (dragInfo.edge.hasDragPoint()) {
-            dragInfo.edge.setDragLocation(point);
+        if (dragInfo.edge.picture.hasDragPoint()) {
+            dragInfo.edge.picture.setDragLocation(point);
         }
         else {
             VertexPicture vertexPicture = getVertexPicture(point);
@@ -493,32 +497,32 @@ public class DiagramComponent extends JComponent {
             else if (attachmentPoint != null) {
                 attachmentPoint = null;
             }
-            if (dragInfo.edge.getTerminusPicture() == null) {
-                dragInfo.edge.setEndPoint(point);
+            if (dragInfo.edge.picture.getTerminusPicture() == null) {
+                dragInfo.edge.picture.setEndPoint(point);
             }
         }
-        setComponentSize(dragInfo.edge.xEast(), dragInfo.edge.ySouth());
+        setComponentSize(dragInfo.edge.picture.xEast(), dragInfo.edge.picture.ySouth());
         repaint();
     }
 
 
     private void finishVertexDragging() {
         cleanupEdges();
-        if (! dragInfo.vertex.equalsShape(dragInfo.originalLocation, dragInfo.originalSize)) {
-            drawHistory.addVertexMutation(dragInfo.vertex, dragInfo.originalLocation, dragInfo.originalSize);
+        if (! dragInfo.vertex.picture.equalsShape(dragInfo.vertex.originalLocation, dragInfo.vertex.originalSize)) {
+            drawHistory.addVertexMutation(dragInfo.vertex.picture, dragInfo.vertex.originalLocation, dragInfo.vertex.originalSize);
         }
     }
 
 
     private void finishEdgeDragging(Point point) {
-        if (dragInfo.edge.hasDragPoint()) {
-            dragInfo.edge.finishDrag();
-            if (! dragInfo.edge.equalsShape(dragInfo.originalXPoints, dragInfo.originalYPoints)) {
-                drawHistory.addEdgeMutation(dragInfo.edge, dragInfo.originalXPoints, dragInfo.originalYPoints);
+        if (dragInfo.edge.picture.hasDragPoint()) {
+            dragInfo.edge.picture.finishDrag();
+            if (! dragInfo.edge.picture.equalsShape(dragInfo.edge.originalXPoints, dragInfo.edge.originalYPoints)) {
+                drawHistory.addEdgeMutation(dragInfo.edge.picture, dragInfo.edge.originalXPoints, dragInfo.edge.originalYPoints);
             }
         }
         else if (! finalizeNewEdge(point)) {
-            pictures.remove(dragInfo.edge);
+            pictures.remove(dragInfo.edge.picture);
             selectedPicture = null;
         }
     }
@@ -528,10 +532,10 @@ public class DiagramComponent extends JComponent {
         VertexPicture terminusPicture = getVertexPicture(point);
         if (terminusPicture != null) {
             int terminusAttachmentIndex = terminusPicture.nearestAttachmentIndex(point);
-            if (! dragInfo.edge.hasOrigin(terminusPicture, terminusAttachmentIndex)) {
-                dragInfo.edge.setTerminus(terminusPicture, terminusAttachmentIndex);
-                editor.edgePictureAdded(this, dragInfo.edge);
-                drawHistory.addEdgeInsertion(dragInfo.edge);
+            if (! dragInfo.edge.picture.hasOrigin(terminusPicture, terminusAttachmentIndex)) {
+                dragInfo.edge.picture.setTerminus(terminusPicture, terminusAttachmentIndex);
+                editor.edgePictureAdded(this, dragInfo.edge.picture);
+                drawHistory.addEdgeInsertion(dragInfo.edge.picture);
                 return true;
             }
         }
@@ -541,23 +545,22 @@ public class DiagramComponent extends JComponent {
     
     private void initializeVertexDragging() {
         if (hoverInfo != null && hoverInfo.location == Location.INTERIOR) {
-            ensureDrawnLast(dragInfo.vertex);
-            dragInfo.distance = new Point(dragInfo.vertex.getLocation().x - dragInfo.startPoint.x, dragInfo.vertex.getLocation().y - dragInfo.startPoint.y);
+            ensureDrawnLast(dragInfo.vertex.picture);
+            dragInfo.vertex.distance = new Point(dragInfo.vertex.picture.getLocation().x - dragInfo.startPoint.x, dragInfo.vertex.picture.getLocation().y - dragInfo.startPoint.y);
         }
-//        dragInfo.originalvertex = new VertexPicture(dragInfo.vertex);
-        dragInfo.originalLocation = dragInfo.vertex.getLocation();
-        dragInfo.originalSize = dragInfo.vertex.getSize();
+        dragInfo.vertex.originalLocation = dragInfo.vertex.picture.getLocation();
+        dragInfo.vertex.originalSize = dragInfo.vertex.picture.getSize();
     }
 
     
     private void dragVertex(Point point) {
         if (hoverInfo.location == Location.INTERIOR) {
             setCursor(Cursor.MOVE_CURSOR);
-            moveDraggingVertexPicture(new Point(point.x + dragInfo.distance.x, point.y + dragInfo.distance.y));
+            moveDraggingVertexPicture(new Point(point.x + dragInfo.vertex.distance.x, point.y + dragInfo.vertex.distance.y));
         }
         else {
-            dragInfo.vertex.resize(hoverInfo.location, point);
-            correctEndPoints(dragInfo.vertex);
+            dragInfo.vertex.picture.resize(hoverInfo.location, point);
+            correctEndPoints(dragInfo.vertex.picture);
         }
         if (attachmentPoint != null) {
             attachmentPoint = null;
@@ -567,11 +570,11 @@ public class DiagramComponent extends JComponent {
 
     
     private void moveDraggingVertexPicture(Point destination) {
-        Point containerPoint = dragInfo.vertex.getLocation();
+        Point containerPoint = dragInfo.vertex.picture.getLocation();
         int δx = destination.x - containerPoint.x;
         int δy = destination.y - containerPoint.y;
-        setVertexLocation(dragInfo.vertex, destination);
-        moveContainedPictures(dragInfo.vertex, δx, δy);
+        setVertexLocation(dragInfo.vertex.picture, destination);
+        moveContainedPictures(dragInfo.vertex.picture, δx, δy);
     }
 
 
@@ -874,16 +877,24 @@ public class DiagramComponent extends JComponent {
 
 
     private class DragInfo {
-        VertexPicture vertex;
-//        VertexPicture originalvertex;
+        VertexDragInfo vertex;
+        EdgeDragInfo edge;
+        Point startPoint;
+    }
+
+
+    private class VertexDragInfo {
+        VertexPicture picture;
+        Point distance;
         Point originalLocation;
         Dimension originalSize;
-        EdgePicture edge;
-//        EdgePicture originalEdge;
+    }
+
+
+    private class EdgeDragInfo {
+        EdgePicture picture;
         int[] originalXPoints;
         int[] originalYPoints;
-        Point startPoint;
-        Point distance;
     }
     
     

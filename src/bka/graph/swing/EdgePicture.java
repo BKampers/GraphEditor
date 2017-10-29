@@ -8,7 +8,6 @@ package bka.graph.swing;
 import bka.graph.*;
 import java.awt.*;
 import java.awt.geom.*;
-import java.util.*;
 import java.util.logging.*;
 
 
@@ -117,11 +116,6 @@ public class EdgePicture extends AbstractPicture {
     
     public final void setTerminus(VertexPicture terminusPicture, Point point) {
         setTerminus(terminusPicture, terminusPicture.nearestAttachmentIndex(point));
-    }
-
-
-    boolean equalsShape(int[] xPoints, int[] yPoints) {
-        return Arrays.equals(xPoints, this.xPoints) && Arrays.equals(yPoints, this.yPoints);
     }
 
 

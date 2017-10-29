@@ -635,6 +635,9 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     
     private DiagramComponent diagramComponent(int index) {
+        if (index < 0) {
+            return null;
+        }
         JScrollPane pane = (JScrollPane) diagramTabbedPane.getComponentAt(index);
         return diagramComponent(pane);
     }
@@ -670,8 +673,10 @@ public class GraphEditor extends bka.swing.FrameApplication {
         @Override
         public void stateChanged(ChangeEvent evt) {
             DiagramComponent diagramComponent = diagramComponent(diagramTabbedPane.getSelectedIndex());
-            historyPanel.setDrawHistory(diagramComponent.getDrawHistory());
-            diagramComponent.requestFocus();
+            if (diagramComponent != null) {
+                historyPanel.setDrawHistory(diagramComponent.getDrawHistory());
+                diagramComponent.requestFocus();
+            }
         }
 
     }

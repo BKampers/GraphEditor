@@ -305,7 +305,7 @@ class VertexTreePanel extends javax.swing.JPanel {
 
         @Override
         public void mouseReleased(MouseEvent evt) {
-            if (evt.getClickCount() == 1) {
+            if (evt.getClickCount() <= 1) {
                 finishDrag(evt.getLocationOnScreen());
             }
         }
@@ -332,6 +332,7 @@ class VertexTreePanel extends javax.swing.JPanel {
                 if (selectedNode instanceof VertexPictureNode) {
                     VertexPicture selectedPicture = (VertexPicture) selectedNode.getUserObject();
                     dragInfo.diagramComponent.addVertexPictureCopy(selectedPicture, locationOnScreen);
+                    dragInfo.diagramComponent.requestFocus();
                 }
             }
             dragInfo = null;

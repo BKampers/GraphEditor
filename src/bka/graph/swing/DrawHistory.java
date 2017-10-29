@@ -51,8 +51,13 @@ class DrawHistory {
     }
 
 
-    void addVertexMutation(VertexPicture picture, Point originalLocation, Dimension originalSize) {
-        addToHistory(new VertexMutation(picture, originalLocation, originalSize));
+    void addVertexRelocation(VertexPicture picture, Point originalLocation) {
+        addToHistory(new VertexRelocation(picture, originalLocation));
+    }
+
+
+    void addVertexResizement(VertexPicture picture, Dimension originalSize) {
+        addToHistory(new VertexResizement(picture, originalSize));
     }
 
 
@@ -66,8 +71,8 @@ class DrawHistory {
     }
 
 
-    void addEdgeMutation(EdgePicture picture, int[] originalXPoints, int[] originalYPoints) {
-        addToHistory(new EdgeMutation(picture, originalXPoints, originalYPoints));
+    void addEdgeTransformation(EdgePicture picture, int[] originalXPoints, int[] originalYPoints) {
+        addToHistory(new EdgeTransformation(picture, originalXPoints, originalYPoints));
     }
 
 
@@ -113,6 +118,22 @@ class DrawHistory {
                 listener.historyChanged(DrawHistory.this);
             }
         }
+    }
+
+
+    private abstract class AbstractMutation implements Mutation {
+
+        @Override
+        public void undo() {
+            revert();
+        }
+
+        @Override
+        public void redo() {
+            revert();
+        }
+
+        abstract protected void revert();
     }
 
 
@@ -169,57 +190,56 @@ class DrawHistory {
     }
 
 
-    private class VertexMutation implements Mutation {
+    private class VertexRelocation extends AbstractMutation {
 
-        VertexMutation(VertexPicture picture, Point originalLocation, Dimension originalSize) {
+        VertexRelocation(VertexPicture picture, Point originalLocation) {
             this.picture = picture;
             this.originalLocation = originalLocation;
-            this.originalSize = originalSize;
         }
 
         @Override
-        public void undo() {
-            revertMutation();
-        }
-
-        @Override
-        public void redo() {
-            revertMutation();
-        }
-
-        private void revertMutation() {
+        protected void revert() {
             Point currentLocation = picture.getLocation();
-            Dimension currentSize = picture.getSize();
-            diagramComponent.revertVertexMutation(picture, originalLocation, originalSize);
+            diagramComponent.revertVertexMutation(picture, originalLocation, picture.getSize());
             originalLocation = currentLocation;
-            originalSize = currentSize;
         }
 
         private final VertexPicture picture;
         private Point originalLocation;
-        private Dimension originalSize;
+
     }
 
 
-    private class EdgeMutation implements Mutation {
+    private class VertexResizement extends AbstractMutation {
 
-        public EdgeMutation(EdgePicture picture, int[] originalXPoints, int[] originalYPoints) {
+        public VertexResizement(VertexPicture picture, Dimension originalSize) {
+            this.picture = picture;
+            this.originalSize = originalSize;
+        }
+
+        @Override
+        protected void revert() {
+            Dimension currentSize = picture.getSize();
+            diagramComponent.revertVertexMutation(picture, picture.getLocation(), originalSize);
+            originalSize = currentSize;
+        }
+
+        private final VertexPicture picture;
+        private Dimension originalSize;
+
+    }
+
+
+    private class EdgeTransformation extends AbstractMutation {
+
+        public EdgeTransformation(EdgePicture picture, int[] originalXPoints, int[] originalYPoints) {
             this.picture = picture;
             this.originalXPoints = originalXPoints;
             this.originalYPoints = originalYPoints;
         }
 
         @Override
-        public void undo() {
-            revert();
-        }
-
-        @Override
-        public void redo() {
-            revert();
-        }
-
-        private void revert() {
+        protected void revert() {
             int[] currentXPoints = picture.getXPoints();
             int[] currentYPoints = picture.getYPoints();
             picture.setXPoints(originalXPoints);

@@ -237,7 +237,6 @@ public class DiagramComponent extends JComponent {
 
     void revertVertexMutation(VertexPicture destination, Point originalLocation, Dimension originalSize) {
         ensureDrawnLast(destination);
-//        Point sourceLocation = source.getLocation();
         int δx = originalLocation.x - destination.getLocation().x;
         int δy = originalLocation.y - destination.getLocation().y;
         setVertexLocation(destination, originalLocation);
@@ -508,8 +507,11 @@ public class DiagramComponent extends JComponent {
 
     private void finishVertexDragging() {
         cleanupEdges();
-        if (! dragInfo.vertex.picture.equalsShape(dragInfo.vertex.originalLocation, dragInfo.vertex.originalSize)) {
-            drawHistory.addVertexMutation(dragInfo.vertex.picture, dragInfo.vertex.originalLocation, dragInfo.vertex.originalSize);
+        if (! dragInfo.vertex.originalLocation.equals(dragInfo.vertex.picture.getLocation())) {
+            drawHistory.addVertexRelocation(dragInfo.vertex.picture, dragInfo.vertex.originalLocation);
+        }
+        if (! dragInfo.vertex.originalSize.equals(dragInfo.vertex.picture.getSize())) {
+            drawHistory.addVertexResizement(dragInfo.vertex.picture, dragInfo.vertex.originalSize);
         }
     }
 
@@ -518,7 +520,7 @@ public class DiagramComponent extends JComponent {
         if (dragInfo.edge.picture.hasDragPoint()) {
             dragInfo.edge.picture.finishDrag();
             if (! dragInfo.edge.picture.equalsShape(dragInfo.edge.originalXPoints, dragInfo.edge.originalYPoints)) {
-                drawHistory.addEdgeMutation(dragInfo.edge.picture, dragInfo.edge.originalXPoints, dragInfo.edge.originalYPoints);
+                drawHistory.addEdgeTransformation(dragInfo.edge.picture, dragInfo.edge.originalXPoints, dragInfo.edge.originalYPoints);
             }
         }
         else if (! finalizeNewEdge(point)) {

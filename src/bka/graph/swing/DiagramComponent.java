@@ -392,14 +392,22 @@ public class DiagramComponent extends JComponent {
         Class edgePictureClass = editor.selectedEdgePictureClass();
         if (edgePictureClass != null) {
             dragInfo.edge = new EdgeDragInfo();
-            initializeNewEdgeDragging(edgePictureClass);
+            try {
+                dragInfo.edge.initializeNewEdgeDrag(edgePictureClass);
+                addEdgePicture(dragInfo.edge.picture);
+                selectedPicture = dragInfo.edge.picture;
+                repaint();
+            }
+            catch (ReflectiveOperationException ex) {
+                Logger.getLogger(DiagramComponent.class.getName()).log(Level.SEVERE, "Draw new edge", ex);
+                dragInfo = null;
+            }
         }
         else {
             EdgePicture edgePicture = getEdgePicture(dragInfo.startPoint);
             if (edgePicture != null) {
                 dragInfo.edge = new EdgeDragInfo();
-                dragInfo.edge.picture = edgePicture;
-                initializeEdgeDragging();
+                dragInfo.edge.initializeDrag(edgePicture);
             }
             else {
                 VertexPicture vertexPicture = getVertexPicture(dragInfo.startPoint);
@@ -413,21 +421,6 @@ public class DiagramComponent extends JComponent {
         requestFocus();
     }
 
-    
-    private void dragNewEdge(Class edgePictureClass, VertexPicture originPicture, Point point) {
-        try {
-            dragInfo.edge.picture = (EdgePicture) edgePictureClass.newInstance();
-            dragInfo.edge.picture.setOrigin(originPicture, point);
-            dragInfo.edge.picture.setEndPoint(point);
-            addEdgePicture(dragInfo.edge.picture);
-            selectedPicture = dragInfo.edge.picture;
-            repaint();
-        }
-        catch (IllegalAccessException | InstantiationException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
     
     private void edgePictureClicked(EdgePicture edgePicture, int count) {
         if (count == 1) {
@@ -462,28 +455,6 @@ public class DiagramComponent extends JComponent {
     }
     
 
-    private void initializeNewEdgeDragging(Class edgePictureClass) {
-        VertexPicture vertexPicture = getVertexPicture(dragInfo.startPoint);
-        if (vertexPicture != null) {
-            if (dragInfo.edge.picture != null) {
-                dragInfo.edge.picture.setTerminus(vertexPicture, dragInfo.startPoint);
-            }
-            else {
-                dragNewEdge(edgePictureClass, vertexPicture, dragInfo.startPoint);
-            }
-        }
-    }
-    
-    
-    private void initializeEdgeDragging() {
-        if (dragInfo.edge.picture.getTerminusPicture() != null) {
-            dragInfo.edge.originalXPoints = dragInfo.edge.picture.getXPoints();
-            dragInfo.edge.originalYPoints = dragInfo.edge.picture.getYPoints();
-            dragInfo.edge.picture.selectDragPoint(dragInfo.startPoint);
-        }
-    }
-    
-    
     private void dragEdge(Point point) {
         if (dragInfo.edge.picture.hasDragPoint()) {
             dragInfo.edge.picture.setDragLocation(point);
@@ -904,12 +875,19 @@ public class DiagramComponent extends JComponent {
 
 
     private class EdgeDragInfo {
-        EdgePicture picture;
-        int[] originalXPoints;
-        int[] originalYPoints;
 
-        boolean transformed() {
-            return ! Arrays.equals(originalXPoints, picture.getXPoints()) || ! Arrays.equals(originalYPoints, picture.getYPoints());
+        void initializeNewEdgeDrag(Class edgePictureClass) throws ReflectiveOperationException {
+            VertexPicture vertexPicture = getVertexPicture(dragInfo.startPoint);
+            if (vertexPicture != null) {
+                dragNewEdge(edgePictureClass, vertexPicture, dragInfo.startPoint);
+            }
+        }
+
+        void initializeDrag(EdgePicture picture) {
+            this.picture = picture;
+            originalXPoints = arrayCopy(picture.getXPoints());
+            originalYPoints = arrayCopy(picture.getYPoints());
+            picture.selectDragPoint(dragInfo.startPoint);
         }
 
         void finishDrag() {
@@ -918,6 +896,24 @@ public class DiagramComponent extends JComponent {
                 drawHistory.addEdgeTransformation(picture, originalXPoints, originalYPoints);
             }
         }
+
+        private void dragNewEdge(Class edgePictureClass, VertexPicture originPicture, Point point) throws ReflectiveOperationException {
+            picture = (EdgePicture) edgePictureClass.newInstance();
+            picture.setOrigin(originPicture, point);
+            picture.setEndPoint(point);
+        }
+
+        private int[] arrayCopy(int[] original) {
+            return Arrays.copyOf(original, original.length);
+        }
+
+        private boolean transformed() {
+            return ! Arrays.equals(originalXPoints, picture.getXPoints()) || ! Arrays.equals(originalYPoints, picture.getYPoints());
+        }
+
+        EdgePicture picture;
+        int[] originalXPoints;
+        int[] originalYPoints;
 
     }
     

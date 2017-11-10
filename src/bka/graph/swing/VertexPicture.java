@@ -16,7 +16,7 @@ import javax.swing.*;
 
 
 public class VertexPicture extends AbstractPicture {
-        
+
     
     public VertexPicture() {
         size = new Dimension(10, 10);
@@ -87,13 +87,13 @@ public class VertexPicture extends AbstractPicture {
 
     private Location internalLocation(Point point) {
         Location internal = Location.INTERIOR;
-        if (point.y <= yNorth() + NEAR_TOLERANCE) {
+        if (point.y <= yNorth() + LOCATION_NEAR_DISTANCE) {
             internal = Location.NORTH;
         }
-        else if (point.y >= ySouth() - NEAR_TOLERANCE) {
+        else if (point.y >= ySouth() - LOCATION_NEAR_DISTANCE) {
             internal = Location.SOUTH;
         }
-        if (point.x <= xWest() + NEAR_TOLERANCE) {
+        if (point.x <= xWest() + LOCATION_NEAR_DISTANCE) {
             switch (internal) {
                 case NORTH:
                     return Location.NORTH_WEST;
@@ -103,7 +103,7 @@ public class VertexPicture extends AbstractPicture {
                     return Location.WEST;
             }
         }
-        else if (point.x >= xEast() - NEAR_TOLERANCE) {
+        else if (point.x >= xEast() - LOCATION_NEAR_DISTANCE) {
             switch (internal) {
                 case NORTH:
                     return Location.NORTH_EAST;
@@ -153,18 +153,21 @@ public class VertexPicture extends AbstractPicture {
 
 
     Point nearestAttachmentPoint(Point point) {
-        return attachmentPoints[nearestAttachmentIndex(point)];
+        int index = nearestAttachmentIndex(point);
+        if (index < 0) {
+            return null;
+        }
+        return attachmentPoints[index];
     }
 
 
     int nearestAttachmentIndex(Point point) {
-        int index = 0;
-        Point nearest = attachmentPoints[0];
-        int shortest = squareDistance(nearest, point);
-        for (int i = 1; i < attachmentPoints.length; i++) {
+        int index = -1;
+        int shortest = -1;
+        for (int i = 0; i < attachmentPoints.length; ++i) {
             Point attachmentPoint = attachmentPoints[i];
             int distance = squareDistance(attachmentPoint, point);
-            if (distance < shortest) {
+            if (distance < ATTACHMENT_NEAR_DISTANCE && (shortest < 0 || distance < shortest)) {
                 index = i;
                 shortest = distance;
             }
@@ -347,8 +350,8 @@ public class VertexPicture extends AbstractPicture {
 
     private boolean insideBounds(Point point) {
         return
-            xWest() - NEAR_TOLERANCE <= point.x && point.x <= xEast() + NEAR_TOLERANCE &&
-            yNorth() - NEAR_TOLERANCE <= point.y && point.y <= ySouth() + NEAR_TOLERANCE;
+            xWest() - LOCATION_NEAR_DISTANCE <= point.x && point.x <= xEast() + LOCATION_NEAR_DISTANCE &&
+            yNorth() - LOCATION_NEAR_DISTANCE <= point.y && point.y <= ySouth() + LOCATION_NEAR_DISTANCE;
     }
 
 
@@ -361,6 +364,7 @@ public class VertexPicture extends AbstractPicture {
 
     private Paint fillPaint = null;
     
-    private static final int NEAR_TOLERANCE = 3;
+    private static final int LOCATION_NEAR_DISTANCE = 3;
+    private static final int ATTACHMENT_NEAR_DISTANCE = 100;
 
 }

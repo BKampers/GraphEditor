@@ -59,8 +59,8 @@ public class DiagramComponent extends JComponent {
 
 
     public final void addEdgePicture(EdgePicture edgePicture, boolean selected) {
-        int index = findInsertIndex(edgePicture);
         page.add(edgePicture);
+        int index = findInsertIndex(edgePicture);
         pictures.add(index, edgePicture);
         if (selected) {
             setSelected(edgePicture);
@@ -390,38 +390,52 @@ public class DiagramComponent extends JComponent {
         dragInfo = new DragInfo();
         dragInfo.startPoint = point;
         Class edgePictureClass = editor.selectedEdgePictureClass();
-        if (edgePictureClass != null) {
-            dragInfo.edge = new EdgeDragInfo();
-            try {
-                dragInfo.edge.initializeNewEdgeDrag(edgePictureClass);
-                addEdgePicture(dragInfo.edge.picture);
-                selectedPicture = dragInfo.edge.picture;
-                repaint();
-            }
-            catch (ReflectiveOperationException ex) {
-                Logger.getLogger(DiagramComponent.class.getName()).log(Level.SEVERE, "Draw new edge", ex);
-                dragInfo = null;
-            }
+        if (attachmentPoint != null && edgePictureClass != null) {
+            startNewEdgeDrag(edgePictureClass);
         }
         else {
             EdgePicture edgePicture = getEdgePicture(dragInfo.startPoint);
             if (edgePicture != null) {
-                dragInfo.edge = new EdgeDragInfo();
-                dragInfo.edge.initializeDrag(edgePicture);
+                startEdgeDrag(edgePicture);
             }
             else {
                 VertexPicture vertexPicture = getVertexPicture(dragInfo.startPoint);
                 if (vertexPicture != null) {
-                    dragInfo.vertex = new VertexDragInfo();
-                    dragInfo.vertex.picture = vertexPicture;
-                    initializeVertexDragging();
+                    startVertexDrag(vertexPicture);
                 }
             }
         }
-        requestFocus();
     }
 
-    
+
+    private void startNewEdgeDrag(Class edgePictureClass) {
+        dragInfo.edge = new EdgeDragInfo();
+        try {
+            dragInfo.edge.initializeNewEdgeDrag(edgePictureClass);
+            pictures.add(dragInfo.edge.picture);
+            selectedPicture = dragInfo.edge.picture;
+            repaint();
+        }
+        catch (ReflectiveOperationException ex) {
+            Logger.getLogger(DiagramComponent.class.getName()).log(Level.SEVERE, "Draw new edge", ex);
+            dragInfo = null;
+        }
+    }
+
+
+    private void startEdgeDrag(EdgePicture edgePicture) {
+        dragInfo.edge = new EdgeDragInfo();
+        dragInfo.edge.initializeDrag(edgePicture);
+    }
+
+
+    private void startVertexDrag(VertexPicture vertexPicture) {
+        dragInfo.vertex = new VertexDragInfo();
+        dragInfo.vertex.picture = vertexPicture;
+        initializeVertexDragging();
+    }
+
+
     private void edgePictureClicked(EdgePicture edgePicture, int count) {
         if (count == 1) {
             setSelected(edgePicture);
@@ -497,8 +511,9 @@ public class DiagramComponent extends JComponent {
         VertexPicture terminusPicture = getVertexPicture(point);
         if (terminusPicture != null) {
             int terminusAttachmentIndex = terminusPicture.nearestAttachmentIndex(point);
-            if (! dragInfo.edge.picture.hasOrigin(terminusPicture, terminusAttachmentIndex)) {
+            if (terminusAttachmentIndex >= 0 && ! dragInfo.edge.picture.hasOrigin(terminusPicture, terminusAttachmentIndex)) {
                 dragInfo.edge.picture.setTerminus(terminusPicture, terminusAttachmentIndex);
+                page.add(dragInfo.edge.picture);
                 editor.edgePictureAdded(this, dragInfo.edge.picture);
                 drawHistory.addEdgeInsertion(dragInfo.edge.picture);
                 return true;
@@ -723,8 +738,9 @@ public class DiagramComponent extends JComponent {
      * @return Top most VertexPicture with point inside.
      */
     private VertexPicture getVertexPicture(Point point) {
-        for (int i = pictures.size() - 1; i >= 0; --i) {
-            AbstractPicture picture = pictures.get(i);
+        Iterator<AbstractPicture> it = pictures.descendingIterator();
+        while (it.hasNext()) {
+            AbstractPicture picture = it.next();
             if (picture instanceof VertexPicture) {
                 Location location = ((VertexPicture) picture).locationOf(point);
                 if (location != Location.EXTERN) {
@@ -926,7 +942,7 @@ public class DiagramComponent extends JComponent {
     
     /**
      * @param edgePicture
-     * @return index of last vertex picture from pictures that origin or terminus of edgePicture
+     * @return index of last vertex picture from pictures that is origin or terminus of edgePicture
      */
     private int findInsertIndex(EdgePicture edgePicture) {
         VertexPicture origin = edgePicture.getOriginPicture();
@@ -967,6 +983,7 @@ public class DiagramComponent extends JComponent {
         
         @Override
         public void mouseClicked(MouseEvent evt) {
+            requestFocus();
             switch (evt.getButton()) {
                 case MouseEvent.BUTTON1:
                     diagramClicked(evt.getClickCount(), evt.getPoint());
@@ -1051,7 +1068,7 @@ public class DiagramComponent extends JComponent {
     
     private final GraphEditor editor;
     private final DiagramPage page;
-    private final ArrayList<AbstractPicture> pictures = new ArrayList<>();
+    private final LinkedList<AbstractPicture> pictures = new LinkedList<>();
 
     private AbstractPicture selectedPicture;
 

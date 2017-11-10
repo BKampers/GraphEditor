@@ -120,6 +120,9 @@ public class EdgePicture extends AbstractPicture {
 
 
     final void setOrigin(VertexPicture originPicture, int originAttachmentIndex) {
+        if (originAttachmentIndex < 0) {
+            throw new IllegalArgumentException();
+        }
         this.originPicture = originPicture;
         this.originAttachmentIndex = originAttachmentIndex;
         Point point = originPoint();
@@ -132,6 +135,9 @@ public class EdgePicture extends AbstractPicture {
 
 
     final void setTerminus(VertexPicture terminusPicture, int terminusAttachmentIndex) {
+        if (terminusAttachmentIndex < 0) {
+            throw new IllegalArgumentException();
+        }
         this.terminusPicture = terminusPicture;
         this.terminusAttachmentIndex = terminusAttachmentIndex;
         Point point = terminusPoint();

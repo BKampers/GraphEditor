@@ -17,6 +17,11 @@ public abstract class AbstractEditPanel extends javax.swing.JPanel {
     }
     
     
+    public GraphEditor getEnvironment() {
+        return environment;
+    }
+
+
     public void setEditDialog(EditDialog editDialog) {
         this.editDialog = editDialog;
     }
@@ -25,9 +30,9 @@ public abstract class AbstractEditPanel extends javax.swing.JPanel {
     public EditDialog getEditDialog() {
         return editDialog;
     }
-    
-    
-    protected GraphEditor environment = null;
+
+
+    protected GraphEditor environment;
     
     private EditDialog editDialog;
     

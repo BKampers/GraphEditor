@@ -11,6 +11,7 @@ import bka.graph.Vertex;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.util.logging.*;
 import javax.swing.tree.*;
 
 
@@ -204,22 +205,38 @@ class VertexTreePanel extends javax.swing.JPanel {
         
         @Override
         public String toString() {
+            StringBuilder builder = new StringBuilder();
             VertexPicture vertexPicture = ((VertexPicture) getUserObject());
             Vertex vertex = vertexPicture.getVertex();
-            assert vertex != null;
-            String name = vertex.getName();
-            if (name == null) {
-                name = vertex.getClass().getSimpleName();
+            if (vertex != null) {
+                String name = vertex.getName();
+                if (name != null) {
+                    builder.append(vertex.getName());
+                }
+                else {
+                    builder.append(vertex.getClass().getSimpleName());
+                }
+            }
+            else {
+                Logger.getLogger(VertexTreePanel.class.getName()).log(Level.WARNING, "Null vertex");
             }
             VertexPicture container = diagramComponent.findContainer((VertexPicture) getUserObject());
             if (container != null) {
-                assert container.getVertex() != null;
-                String containerName = container.getVertex().getName();
-                if (containerName != null) {
-                    name += " @ " + container.getVertex().getName();
+                builder.append(" @ ");
+                if (container.getVertex() != null) {
+                    String containerName = container.getVertex().getName();
+                    if (containerName != null) {
+                        builder.append(containerName);
+                    }
+                    else {
+                        builder.append(container.getClass().getSimpleName());
+                    }
+                }
+                else {
+                    Logger.getLogger(VertexTreePanel.class.getName()).log(Level.WARNING, "Null container");
                 }
             }
-            return (name != null) ? name : vertex.getClass().getSimpleName();
+            return builder.toString();
         }
         
         DiagramComponent diagramComponent;

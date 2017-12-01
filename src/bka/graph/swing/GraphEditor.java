@@ -175,18 +175,35 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
 
 
-    protected void setHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
-        getSelectedDiagramComponent().setHighlighted(picture, drawStyle);
+    protected void setHighlighted(Vertex vertex, DrawStyle drawStyle) {
+        int count = diagramTabbedPane.getTabCount();
+        for (int i = 0; i < count; ++i) {
+            boolean vertexHighlighted = diagramComponent(i).setHighlighted(vertex, drawStyle);
+            if (vertexHighlighted && i == diagramTabbedPane.getSelectedIndex()) {
+                diagramComponent(i).repaint();
+            }
+        }
     }
 
 
+    protected void setHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
+        getSelectedDiagramComponent().setHighlighted(picture, drawStyle);
+    }
+    
+    
     protected void resetHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
-        getSelectedDiagramComponent().resetHighlighted(picture, drawStyle);
+        DiagramComponent diagramComponent = getSelectedDiagramComponent();
+        if (diagramComponent.resetHighlighted(picture, drawStyle)) {
+            diagramComponent.repaint();
+        }
     }
 
 
     protected void resetHighlighted(DrawStyle drawStyle) {
-        getSelectedDiagramComponent().resetHighlighted(drawStyle);
+        DiagramComponent diagramComponent = getSelectedDiagramComponent();
+        if (diagramComponent.resetHighlighted(drawStyle)) {
+            diagramComponent.repaint();
+        }
     }
 
 
@@ -203,7 +220,21 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
     
-    protected JPopupMenu getEdgeMenu(final EdgePicture picture) {
+    protected JPopupMenu getVertexMenu(VertexPicture picture) {
+        JPopupMenu menu = new JPopupMenu();
+        for (JMenuItem menuItem : getVertexMenuItems(picture)) {
+            menu.add(menuItem);
+        }
+        return menu;
+    }
+    
+    
+    protected java.util.List<JMenuItem> getVertexMenuItems(VertexPicture picture) {
+        return Collections.EMPTY_LIST;
+    }
+    
+    
+    protected JPopupMenu getEdgeMenu(EdgePicture picture) {
         JPopupMenu menu = new JPopupMenu();
         for (String paintKey : picture.getCustomizablePaints()) {
             JMenuItem colorItem = new JMenuItem("Color: " + paintKey);

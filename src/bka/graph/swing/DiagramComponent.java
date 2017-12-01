@@ -182,6 +182,18 @@ public class DiagramComponent extends JComponent {
     }
 
 
+    boolean setHighlighted(Vertex vertex, DrawStyle drawStyle) {
+        boolean vertexHighlighted = false;
+        for (AbstractPicture picture : pictures) {
+            if (picture instanceof VertexPicture && ((VertexPicture) picture).getVertex() == vertex) {
+                setHighlighted(picture, drawStyle);
+                vertexHighlighted = true;
+            }
+        }
+        return vertexHighlighted;
+    }
+
+
     void setHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
         if (picture == null || drawStyle == null) {
             throw new IllegalArgumentException();
@@ -193,23 +205,27 @@ public class DiagramComponent extends JComponent {
         }
         pictureHighlights.add(drawStyle);
     }
-
-
-    void resetHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
-       Collection<DrawStyle> pictureHighlights = highlights.get(picture);
-       if (pictureHighlights != null) {
-           pictureHighlights.remove(drawStyle);
-           if (pictureHighlights.isEmpty()) {
-               highlights.remove(picture);
-           }
-       }
+    
+    
+    boolean resetHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
+        boolean reset = false;
+        Collection<DrawStyle> pictureHighlights = highlights.get(picture);
+        if (pictureHighlights != null) {
+            reset |= pictureHighlights.remove(drawStyle);
+            if (pictureHighlights.isEmpty()) {
+                highlights.remove(picture);
+            }
+        }
+        return reset;
     }
 
 
-    void resetHighlighted(DrawStyle drawStyle) {
+    boolean resetHighlighted(DrawStyle drawStyle) {
+        boolean reset = false;
         for (Map.Entry<AbstractPicture, Collection<DrawStyle>> pictureHighlights : highlights.entrySet()) {
-            pictureHighlights.getValue().remove(drawStyle);
+            reset |= pictureHighlights.getValue().remove(drawStyle);
        }
+        return reset;
     }
     
     
@@ -725,11 +741,25 @@ public class DiagramComponent extends JComponent {
 
     
     private void popupContextMenu(Point point) {
-        EdgePicture edgePicture = getEdgePicture(point);
-        if (edgePicture != null) {
-            JPopupMenu menu = editor.getEdgeMenu(edgePicture);
+        JPopupMenu menu = contextMenu(point);
+        if (menu != null) {
             menu.show(this, point.x, point.y);
         }
+    }
+    
+    
+    private JPopupMenu contextMenu(Point point) {
+        EdgePicture edgePicture = getEdgePicture(point);
+        if (edgePicture != null) {
+            return editor.getEdgeMenu(edgePicture);
+        }
+        else {
+            VertexPicture vertexPicture = getVertexPicture(point);
+            if (vertexPicture != null) {
+                return editor.getVertexMenu(vertexPicture);
+            }
+        }
+        return null;
     }
     
     

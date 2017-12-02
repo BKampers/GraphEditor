@@ -81,7 +81,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
             frame.setVisible(true);
         });
     }
-
+    
 
     protected Map<String, Class<? extends VertexPicture>> getVertexButtons() {
         HashMap<String, Class<? extends VertexPicture>> map = new HashMap<>();
@@ -99,6 +99,10 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
     @Override
     protected void opened() {
+        Integer deviderLocation = getIntProperty(SPLIT_DIVIDER_PROPERTY);
+        if (deviderLocation != null) {
+            diagramSplitPane.setDividerLocation(deviderLocation);
+        }
         book = new Book(getPersistenceDelegates());
         Object path = getProperty(DIAGRAM_FILE_PROPERTY);
         if (path != null) {
@@ -113,6 +117,12 @@ public class GraphEditor extends bka.swing.FrameApplication {
         }
     }
     
+
+    @Override
+    protected void closing() {
+        setProperty(SPLIT_DIVIDER_PROPERTY, String.valueOf(diagramSplitPane.getDividerLocation()));
+    }
+
     
     protected Class selectedVertexPictureClass() {
         for (Map.Entry<JToggleButton, Class> entry : vertexPictureClasses.entrySet()) {
@@ -405,8 +415,6 @@ public class GraphEditor extends bka.swing.FrameApplication {
         documentPanelPanel.add(saveAsButton);
 
         getContentPane().add(documentPanelPanel, java.awt.BorderLayout.EAST);
-
-        diagramSplitPane.setDividerLocation(100);
 
         diagramTabbedPane.setTabPlacement(javax.swing.JTabbedPane.BOTTOM);
         diagramTabbedPane.setMinimumSize(new java.awt.Dimension(100, 100));
@@ -776,6 +784,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     private static final javax.swing.filechooser.FileNameExtensionFilter XML_FILE_FILTER = new javax.swing.filechooser.FileNameExtensionFilter("XML Graphs", XML_EXTENSION);
 
     private static final String DIAGRAM_FILE_PROPERTY = "DiagramFile";
+    private static final String SPLIT_DIVIDER_PROPERTY = "diagramSplitPane.dividerLocation";
     
     private static final int EDIT_MIN_WIDTH = 50;
 

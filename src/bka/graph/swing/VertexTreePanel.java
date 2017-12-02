@@ -280,6 +280,9 @@ class VertexTreePanel extends javax.swing.JPanel {
     
     private DefaultMutableTreeNode getSelectedNode() {
         TreePath path = tree.getSelectionPath();
+        if (path == null) {
+            return null;
+        }
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
         return node;
     }

@@ -19,6 +19,11 @@ import javax.swing.event.*;
 public class GraphEditor extends bka.swing.FrameApplication {
 
 
+    public interface ContextDelegate {
+        java.util.List<JMenuItem> getVertexMenuItems(VertexPicture picture);
+        java.util.List<JMenuItem> getEdgeMenuItems(EdgePicture picture);
+    }
+    
     public interface OnLoadDelegate {
         void onLoad();
     }
@@ -83,10 +88,36 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
 
+    public void pickColor(AbstractPicture picture, Object key) {
+        DrawStyle drawStyle = DrawStyleManager.getInstance().getDrawStyle(picture);
+        Color color = null;
+        if (drawStyle != null) {
+            color = drawStyle.getColor(key);
+        }
+        Color newColor = JColorChooser.showDialog(this, "Pick Color", color);
+        if (newColor != null) {
+            drawStyle = new DrawStyle(drawStyle);
+            drawStyle.setColor(key, newColor);
+            DrawStyleManager.getInstance().setDrawStyle(picture, drawStyle);
+        }
+        getSelectedDiagramComponent().clearHoverInfo();
+    }
+    
+
     protected Map<String, Class<? extends VertexPicture>> getVertexButtons() {
         HashMap<String, Class<? extends VertexPicture>> map = new HashMap<>();
         map.put("Vertex", VertexPicture.class);
         return map;
+    }
+
+
+    JPopupMenu getVertexMenu(VertexPicture picture) {
+        return createPopupMenu(getContextDelegate().getVertexMenuItems(picture));
+    }
+    
+    
+    JPopupMenu getEdgeMenu(EdgePicture picture) {
+        return createPopupMenu(getContextDelegate().getEdgeMenuItems(picture));
     }
 
 
@@ -230,33 +261,16 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
     
-    protected JPopupMenu getVertexMenu(VertexPicture picture) {
-        JPopupMenu menu = new JPopupMenu();
-        for (JMenuItem menuItem : getVertexMenuItems(picture)) {
-            menu.add(menuItem);
-        }
-        return menu;
+    protected ContextDelegate getContextDelegate() {
+        return new DefaultContextDelegate(this);
     }
     
     
-    protected java.util.List<JMenuItem> getVertexMenuItems(VertexPicture picture) {
-        return Collections.EMPTY_LIST;
+    protected OnLoadDelegate getOnLoadDelegate() {
+        return null;
     }
     
     
-    protected JPopupMenu getEdgeMenu(EdgePicture picture) {
-        JPopupMenu menu = new JPopupMenu();
-        for (String paintKey : picture.getCustomizablePaints()) {
-            JMenuItem colorItem = new JMenuItem("Color: " + paintKey);
-            colorItem.addActionListener((ActionEvent evt) -> {
-                modifyColor(picture, paintKey);
-            });
-            menu.add(colorItem);
-        }
-        return menu;
-    }
-
-
     protected Map<Class, java.beans.PersistenceDelegate> getPersistenceDelegates() {
         return null;
     }
@@ -364,6 +378,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
         diagramPopupMenu.add(deleteDiagramMenuItem);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setMinimumSize(new java.awt.Dimension(1000, 800));
 
         pictureButtonPanel.setPreferredSize(new java.awt.Dimension(10, 80));
         getContentPane().add(pictureButtonPanel, java.awt.BorderLayout.NORTH);
@@ -570,22 +585,15 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
 
     
-    private void modifyColor(AbstractPicture picture, Object key) {
-        DrawStyle drawStyle = DrawStyleManager.getInstance().getDrawStyle(picture);
-        Color color = null;
-        if (drawStyle != null) {
-            color = drawStyle.getColor(key);
+    private JPopupMenu createPopupMenu(Collection<JMenuItem> items) {
+        JPopupMenu menu = new JPopupMenu();
+        for (JMenuItem menuItem : items) {
+            menu.add(menuItem);
         }
-        Color newColor = JColorChooser.showDialog(this, "Pick Color", color);
-        if (newColor != null) {
-            drawStyle = new DrawStyle(drawStyle);
-            drawStyle.setColor(key, newColor);
-            DrawStyleManager.getInstance().setDrawStyle(picture, drawStyle);
-        }
-        getSelectedDiagramComponent().clearHoverInfo();
+        return menu;
     }
-    
 
+    
     private void createEmptyBook() {
         diagramTabbedPane.removeAll();
         book = new Book(getPersistenceDelegates());
@@ -610,6 +618,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
             }
             diagramTabbedPane.setSelectedIndex(book.getPageIndex());
             vertexTreePanel.rebuild();
+            OnLoadDelegate onLoadDelegate = getOnLoadDelegate();
             if (onLoadDelegate != null) {
                 onLoadDelegate.onLoad();
             }
@@ -742,9 +751,6 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
 
     protected Book book;
-
-
-    protected OnLoadDelegate onLoadDelegate;
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

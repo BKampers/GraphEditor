@@ -219,21 +219,21 @@ public class GraphEditor extends bka.swing.FrameApplication {
     protected void setHighlighted(Vertex vertex, DrawStyle drawStyle) {
         int count = diagramTabbedPane.getTabCount();
         for (int i = 0; i < count; ++i) {
-            boolean vertexHighlighted = diagramComponent(i).setHighlighted(vertex, drawStyle);
+            boolean vertexHighlighted = getDiagramComponent(i).setHighlighted(vertex, drawStyle);
             if (vertexHighlighted && i == diagramTabbedPane.getSelectedIndex()) {
-                diagramComponent(i).repaint();
+                getDiagramComponent(i).repaint();
             }
         }
     }
 
 
     protected void setHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
-        getSelectedDiagramComponent().setHighlighted(picture, drawStyle);
+        getDiagramComponent(picture).setHighlighted(picture, drawStyle);
     }
     
     
     protected void resetHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
-        DiagramComponent diagramComponent = getSelectedDiagramComponent();
+        DiagramComponent diagramComponent = getDiagramComponent(picture);
         if (diagramComponent.resetHighlighted(picture, drawStyle)) {
             diagramComponent.repaint();
         }
@@ -241,9 +241,11 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
 
     protected void resetHighlighted(DrawStyle drawStyle) {
-        DiagramComponent diagramComponent = getSelectedDiagramComponent();
-        if (diagramComponent.resetHighlighted(drawStyle)) {
-            diagramComponent.repaint();
+        for (int i = 0; i <  diagramTabbedPane.getTabCount(); ++i) {
+            DiagramComponent diagramComponent = getDiagramComponent(i);
+            if (diagramComponent.resetHighlighted(drawStyle) && i == diagramTabbedPane.getSelectedIndex()) {
+                diagramComponent.repaint();
+            }
         }
     }
 
@@ -300,7 +302,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
         ArrayList<DiagramComponent> components = new ArrayList<>();
         int count = diagramTabbedPane.getTabCount();
         for (int i = 0; i < count; ++i) {
-            components.add(diagramComponent(i));
+            components.add(getDiagramComponent(i));
         }
         return components;
     }
@@ -447,15 +449,6 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }// </editor-fold>//GEN-END:initComponents
 
 
-    private DiagramComponent getSelectedDiagramComponent() {
-        int index = diagramTabbedPane.getSelectedIndex();
-        if (index < 0) {
-            return null;
-        }
-        return diagramComponent(index);
-    }
-
-
     private void addGraphButtons() {
         for (Map.Entry<String, Class<? extends VertexPicture>> entry : getVertexButtons().entrySet()) {
             addVertexButton(entry.getKey(), entry.getValue());
@@ -568,7 +561,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
 
     private void updateTabTitle(int tabIndex) {
-        DiagramComponent diagramComponent = diagramComponent(tabIndex);
+        DiagramComponent diagramComponent = getDiagramComponent(tabIndex);
         diagramTabbedPane.setTitleAt(tabIndex, diagramComponent.getTitle());
         vertexTreePanel.diagramModified(diagramComponent);
     }
@@ -578,7 +571,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
         Rectangle bounds = diagramTabbedPane.getBoundsAt(index);
         bka.swing.PopupTextField popup = new bka.swing.PopupTextField(diagramTabbedPane.getTitleAt(index), bounds, EDIT_MIN_WIDTH);
         popup.addListener((String text) -> {
-            diagramComponent(index).setTitle(text);
+            getDiagramComponent(index).setTitle(text);
             updateTabTitle(index);
         });
         popup.show(diagramTabbedPane);
@@ -673,8 +666,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     private int indexOf(DiagramComponent diagramComponent) {
         int count = diagramTabbedPane.getTabCount();
         for (int index = 0; index < count; ++index) {
-            DiagramComponent component = diagramComponent(index);
-            if (component == diagramComponent) {
+            if (diagramComponent == getDiagramComponent(index)) {
                 return index;
             }
         }
@@ -682,19 +674,33 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
     
-    private DiagramComponent diagramComponent(int index) {
+    private DiagramComponent getSelectedDiagramComponent() {
+        return getDiagramComponent(diagramTabbedPane.getSelectedIndex());
+    }
+
+
+    private DiagramComponent getDiagramComponent(int index) {
         if (index < 0) {
             return null;
         }
         JScrollPane pane = (JScrollPane) diagramTabbedPane.getComponentAt(index);
-        return diagramComponent(pane);
+        return getDiagramComponent(pane);
     }
     
     
-    private DiagramComponent diagramComponent(JScrollPane pane) {
-        if (pane == null) {
-            return null;
+    private DiagramComponent getDiagramComponent(AbstractPicture picture) {
+        int count = diagramTabbedPane.getTabCount();
+        for (int index = 0; index < count; ++index) {
+            DiagramComponent diagramComponent = getDiagramComponent(index);
+            if (diagramComponent.contains(picture)) {
+                return diagramComponent;
+            }
         }
+        return null;
+    }
+    
+    
+    private DiagramComponent getDiagramComponent(JScrollPane pane) {
         return (DiagramComponent) pane.getViewport().getComponent(0);
     }
     
@@ -720,7 +726,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
         @Override
         public void stateChanged(ChangeEvent evt) {
-            DiagramComponent diagramComponent = diagramComponent(diagramTabbedPane.getSelectedIndex());
+            DiagramComponent diagramComponent = getDiagramComponent(diagramTabbedPane.getSelectedIndex());
             if (diagramComponent != null) {
                 historyPanel.setDrawHistory(diagramComponent.getDrawHistory());
                 diagramComponent.requestFocus();
@@ -770,9 +776,6 @@ public class GraphEditor extends bka.swing.FrameApplication {
     private javax.swing.JButton saveButton;
     // End of variables declaration//GEN-END:variables
     
-
-//    private DiagramComponent selectedDiagramComponent;
-
 
     private final VertexTreePanel vertexTreePanel;
     private final HistoryPanel historyPanel;

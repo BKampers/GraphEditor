@@ -174,17 +174,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
         return null;
     }
     
-    
-    protected String toolTipText(VertexPicture picture) {
-        return null;
-    }
-
-
-    protected String toolTipText(EdgePicture picture) {
-        return null;
-    }
-    
-    
+      
     protected void vertexPictureAdded(DiagramComponent diagramComponent, VertexPicture vertexPicture) {
         vertexTreePanel.vertexAdded(vertexPicture, getSelectedDiagramComponent());
     }

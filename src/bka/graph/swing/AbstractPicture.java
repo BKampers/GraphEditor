@@ -28,6 +28,8 @@ public abstract class AbstractPicture {
     protected abstract int xEast();
     protected abstract int yNorth();
     protected abstract int ySouth();
+    
+    protected abstract String getToolTipText();
 
 
     public final Shape getShape() {

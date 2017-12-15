@@ -17,7 +17,7 @@ import javax.swing.*;
 public class DiagramComponent extends JComponent {
     
     
-    public static final String HIGHLIGHT_BORDER = "BORDER";
+    public static final Object HIGHLIGHT_BORDER = "BORDER";
     
     
     DiagramComponent(GraphEditor editor, DiagramPage page) {
@@ -106,15 +106,7 @@ public class DiagramComponent extends JComponent {
             }
         }
         for (Map.Entry<AbstractPicture, Collection<DrawStyle>> highlight : highlights.entrySet()) {
-            for (DrawStyle style : highlight.getValue()) {
-                Color color = style.getColor(HIGHLIGHT_BORDER);
-                Stroke stroke = style.getStroke(HIGHLIGHT_BORDER);
-                if (color != null && stroke != null) {
-                    g2d.setPaint(color);
-                    g2d.setStroke(stroke);
-                    g2d.draw(highlight.getKey().getShape());
-                }
-            }
+            paintHighlight(g2d, highlight.getKey(), highlight.getValue());
         }
         if (selectedPicture != null) {
             g2d.setColor(SELECTION_COLOR);
@@ -124,6 +116,19 @@ public class DiagramComponent extends JComponent {
         if (attachmentPoint != null) {
             g2d.setColor(attachmentPointColor);
             g2d.fillOval(attachmentPoint.x - attachmentPointWidth / 2, attachmentPoint.y - attachmentPointHeight / 2, attachmentPointWidth, attachmentPointHeight);
+        }
+    }
+
+    
+    private void paintHighlight(Graphics2D g2d, AbstractPicture picture, Collection<DrawStyle> drawStyles) {
+        for (DrawStyle style : drawStyles) {
+            Color color = style.getColor(HIGHLIGHT_BORDER);
+            Stroke stroke = style.getStroke(HIGHLIGHT_BORDER);
+            if (color != null && stroke != null) {
+                g2d.setPaint(color);
+                g2d.setStroke(stroke);
+                g2d.draw(picture.getShape());
+            }
         }
     }
 
@@ -603,19 +608,6 @@ public class DiagramComponent extends JComponent {
     }
     
 
-    private void setToolTip(AbstractPicture picture) {
-        if (picture instanceof VertexPicture) {
-            setToolTipText(editor.toolTipText((VertexPicture) picture));
-        }
-        else if (picture instanceof EdgePicture) {
-            setToolTipText(editor.toolTipText((EdgePicture) picture));
-        }
-        else {
-            setToolTipText(null);
-        }
-    }
-    
-    
     private void setDiagramCursor(AbstractPicture picture, Point point) {
         if (picture instanceof VertexPicture) {
             setVertexCursor();
@@ -725,6 +717,7 @@ public class DiagramComponent extends JComponent {
             }
             hoverInfo.picture = picture;
             hoverInfo.location = location;
+            setToolTipText(picture.getToolTipText());
         }
         else {
             hoverInfo = null;
@@ -736,7 +729,6 @@ public class DiagramComponent extends JComponent {
             setAttachmentPoint(picture, point);
             needRepaint = true;
         }
-        setToolTip(picture);
         if (needRepaint) {
             repaint();
         }

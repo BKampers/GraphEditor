@@ -381,6 +381,12 @@ public class EdgePicture extends AbstractPicture {
     }
 
 
+    @Override
+    protected String getToolTipText() {
+        return null;
+    }
+
+
     protected void paintArrowhead(Graphics2D g2d) {
         int[] xCoordinates = {-5, 0,  5};
         int[] yCoordinates = {-5, 5, -5};

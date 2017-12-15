@@ -8,9 +8,9 @@ import bka.graph.*;
 import java.awt.*;
 import java.awt.font.*;
 import java.awt.geom.*;
-import java.awt.image.BufferedImage;
-import java.text.*;
+import java.awt.image.*;
 import java.text.AttributedCharacterIterator.Attribute;
+import java.text.*;
 import java.util.*;
 import javax.swing.*;
 
@@ -260,6 +260,11 @@ public class VertexPicture extends AbstractPicture {
         fillPaint = null;
     }
 
+
+    @Override
+    protected String getToolTipText() {
+        return null;
+    }
 
     protected Paint getFillPaint() {
         if (fillPaint == null) {

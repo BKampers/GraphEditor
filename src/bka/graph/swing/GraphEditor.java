@@ -228,13 +228,17 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
 
     protected void setHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
-        getDiagramComponent(picture).setHighlighted(picture, drawStyle);
+        DiagramComponent diagramComponent = getDiagramComponent(picture);
+        diagramComponent.setHighlighted(picture, drawStyle);
+        if (indexOf(diagramComponent) == diagramTabbedPane.getSelectedIndex()) {
+            diagramComponent.repaint();
+        }
     }
     
     
     protected void resetHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
         DiagramComponent diagramComponent = getDiagramComponent(picture);
-        if (diagramComponent.resetHighlighted(picture, drawStyle)) {
+        if (diagramComponent.resetHighlighted(picture, drawStyle) && indexOf(diagramComponent) == diagramTabbedPane.getSelectedIndex()) {
             diagramComponent.repaint();
         }
     }

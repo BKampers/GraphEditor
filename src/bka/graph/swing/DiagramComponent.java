@@ -5,8 +5,8 @@
 package bka.graph.swing;
 
 import bka.awt.*;
-import bka.graph.document.*;
 import bka.graph.*;
+import bka.graph.document.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
@@ -15,6 +15,9 @@ import javax.swing.*;
 
 
 public class DiagramComponent extends JComponent {
+    
+    
+    public static final String HIGHLIGHT_BORDER = "BORDER";
     
     
     DiagramComponent(GraphEditor editor, DiagramPage page) {
@@ -104,8 +107,8 @@ public class DiagramComponent extends JComponent {
         }
         for (Map.Entry<AbstractPicture, Collection<DrawStyle>> highlight : highlights.entrySet()) {
             for (DrawStyle style : highlight.getValue()) {
-                Color color = style.getColor("BORDER");
-                Stroke stroke = style.getStroke("BORDER");
+                Color color = style.getColor(HIGHLIGHT_BORDER);
+                Stroke stroke = style.getStroke(HIGHLIGHT_BORDER);
                 if (color != null && stroke != null) {
                     g2d.setPaint(color);
                     g2d.setStroke(stroke);

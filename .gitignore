@@ -2,3 +2,6 @@
 /nbproject/private/
 /build/
 /dist/
+/properties
+*.log
+*.lck

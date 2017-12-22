@@ -104,13 +104,6 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
 
-    protected Map<String, Class<? extends VertexPicture>> getVertexButtons() {
-        HashMap<String, Class<? extends VertexPicture>> map = new HashMap<>();
-        map.put("Vertex", VertexPicture.class);
-        return map;
-    }
-
-
     JPopupMenu getVertexMenu(VertexPicture picture) {
         return createPopupMenu(getContextDelegate().getVertexMenuItems(picture));
     }
@@ -118,6 +111,33 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     JPopupMenu getEdgeMenu(EdgePicture picture) {
         return createPopupMenu(getContextDelegate().getEdgeMenuItems(picture));
+    }
+
+
+    Class selectedVertexPictureClass() {
+        for (Map.Entry<JToggleButton, Class> entry : vertexPictureClasses.entrySet()) {
+            if (entry.getKey().isSelected()) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+    
+    
+    Class selectedEdgePictureClass() {
+        for (Map.Entry<JToggleButton, Class> entry : edgePictureClasses.entrySet()) {
+            if (entry.getKey().isSelected()) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+    
+      
+    protected Map<String, Class<? extends VertexPicture>> getVertexButtons() {
+        HashMap<String, Class<? extends VertexPicture>> map = new HashMap<>();
+        map.put("Vertex", VertexPicture.class);
+        return map;
     }
 
 
@@ -155,26 +175,6 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
 
     
-    protected Class selectedVertexPictureClass() {
-        for (Map.Entry<JToggleButton, Class> entry : vertexPictureClasses.entrySet()) {
-            if (entry.getKey().isSelected()) {
-                return entry.getValue();
-            }
-        }
-        return null;
-    }
-    
-    
-    protected Class selectedEdgePictureClass() {
-        for (Map.Entry<JToggleButton, Class> entry : edgePictureClasses.entrySet()) {
-            if (entry.getKey().isSelected()) {
-                return entry.getValue();
-            }
-        }
-        return null;
-    }
-    
-      
     protected void vertexPictureAdded(DiagramComponent diagramComponent, VertexPicture vertexPicture) {
         vertexTreePanel.vertexAdded(vertexPicture, getSelectedDiagramComponent());
     }
@@ -205,6 +205,15 @@ public class GraphEditor extends bka.swing.FrameApplication {
     protected void edgePictureRemoved(EdgePicture edgePicture) {
     }
 
+    
+    protected void selectDiagram(AbstractPicture picture) {
+        DiagramComponent diagramComponent = getDiagramComponent(picture);
+        int index = indexOf(diagramComponent);
+        if (index != diagramTabbedPane.getSelectedIndex()) {
+            diagramTabbedPane.setSelectedIndex(index);
+        }
+    }
+    
 
     protected void setHighlighted(Vertex vertex, DrawStyle drawStyle) {
         int count = diagramTabbedPane.getTabCount();

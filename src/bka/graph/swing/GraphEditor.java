@@ -245,11 +245,15 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
 
     protected VertexPicture getVertexPicture(Vertex vertex) {
-        DiagramComponent diagramComponent = getSelectedDiagramComponent();
-        if (diagramComponent != null) {
-            for (VertexPicture picture : diagramComponent.getVertexPictures()) {
-                if (vertex == picture.getVertex()) {
-                    return picture;
+        int count = diagramTabbedPane.getTabCount();
+        int selected = diagramTabbedPane.getSelectedIndex();
+        for (int i = 0; i <  count; ++i) {
+            DiagramComponent diagramComponent = getDiagramComponent((selected + i) % count);
+            if (diagramComponent != null) {
+                for (VertexPicture picture : diagramComponent.getVertexPictures()) {
+                    if (vertex == picture.getVertex()) {
+                        return picture;
+                    }
                 }
             }
         }

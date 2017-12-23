@@ -83,9 +83,11 @@ public class DiagramComponent extends JComponent {
     
     public final ArrayList<VertexPicture> getVertexPictures() {
         ArrayList<VertexPicture> vertices = new ArrayList<>();
-        for (AbstractPicture picture : pictures) {
-            if (picture instanceof VertexPicture) {
-                vertices.add((VertexPicture) picture);
+        synchronized (pictures) {
+            for (AbstractPicture picture : pictures) {
+                if (picture instanceof VertexPicture) {
+                    vertices.add((VertexPicture) picture);
+                }
             }
         }
         return vertices;
@@ -97,16 +99,20 @@ public class DiagramComponent extends JComponent {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-        for (AbstractPicture picture : pictures) {
-            try {
-                picture.paint(g2d);
-            }
-            catch (RuntimeException ex) {
-                Logger.getLogger(DiagramComponent.class.getName()).log(Level.SEVERE, "Eelement paint", ex);
+        synchronized (pictures) {
+            for (AbstractPicture picture : pictures) {
+                try {
+                    picture.paint(g2d);
+                }
+                catch (RuntimeException ex) {
+                    Logger.getLogger(DiagramComponent.class.getName()).log(Level.SEVERE, "Eelement paint", ex);
+                }
             }
         }
-        for (Map.Entry<AbstractPicture, Collection<DrawStyle>> highlight : highlights.entrySet()) {
-            paintHighlight(g2d, highlight.getKey(), highlight.getValue());
+        synchronized (highlights) {
+            for (Map.Entry<AbstractPicture, Collection<DrawStyle>> highlight : highlights.entrySet()) {
+                paintHighlight(g2d, highlight.getKey(), highlight.getValue());
+            }
         }
         if (selectedPicture != null) {
             g2d.setColor(SELECTION_COLOR);
@@ -192,10 +198,12 @@ public class DiagramComponent extends JComponent {
 
     boolean setHighlighted(Vertex vertex, DrawStyle drawStyle) {
         boolean vertexHighlighted = false;
-        for (AbstractPicture picture : pictures) {
-            if (picture instanceof VertexPicture && ((VertexPicture) picture).getVertex() == vertex) {
-                setHighlighted(picture, drawStyle);
-                vertexHighlighted = true;
+        synchronized (pictures) {
+            for (AbstractPicture picture : pictures) {
+                if (picture instanceof VertexPicture && ((VertexPicture) picture).getVertex() == vertex) {
+                    setHighlighted(picture, drawStyle);
+                    vertexHighlighted = true;
+                }
             }
         }
         return vertexHighlighted;
@@ -230,9 +238,11 @@ public class DiagramComponent extends JComponent {
 
     boolean resetHighlighted(DrawStyle drawStyle) {
         boolean reset = false;
-        for (Map.Entry<AbstractPicture, Collection<DrawStyle>> pictureHighlights : highlights.entrySet()) {
-            reset |= pictureHighlights.getValue().remove(drawStyle);
-       }
+        synchronized (highlights) {
+            for (Map.Entry<AbstractPicture, Collection<DrawStyle>> pictureHighlights : highlights.entrySet()) {
+                reset |= pictureHighlights.getValue().remove(drawStyle);
+           }
+        }
         return reset;
     }
     
@@ -278,40 +288,6 @@ public class DiagramComponent extends JComponent {
         page.setTitle(title);
     }
 
-    
-    protected final void setVertexPictures(Collection<VertexPicture> vertexPictures) {
-        if (vertexPictures != null) {
-            pictures.addAll(vertexPictures);
-            int southMost = Integer.MIN_VALUE;
-            int eastMost = Integer.MIN_VALUE;
-            for (AbstractPicture picture : pictures) {
-                southMost = Math.max(picture.ySouth(), southMost);
-                eastMost = Math.max(picture.xEast(), eastMost);
-            }
-            setComponentSize(eastMost, southMost);
-        }
-    }
-
-
-    protected final ArrayList<EdgePicture> getEdgePictures() {
-        ArrayList<EdgePicture> edges = new ArrayList<>();
-        for (AbstractPicture picture : pictures) {
-            if (picture instanceof EdgePicture) {
-                edges.add((EdgePicture) picture);
-            }
-        }
-        return edges;
-    }
-
-    
-    protected final void setEdgePictures(Collection<EdgePicture> edgePictures) {
-        if (edgePictures != null) {
-            for (EdgePicture picture : edgePictures) {
-                addEdgePicture(picture);
-            }
-        }
-    }
-    
     
     protected VertexPicture findContainer(VertexPicture vertexPicture) {
         int index = pictures.indexOf(vertexPicture);
@@ -367,6 +343,19 @@ public class DiagramComponent extends JComponent {
     }
 
 
+    private ArrayList<EdgePicture> getEdgePictures() {
+        ArrayList<EdgePicture> edges = new ArrayList<>();
+        synchronized (pictures) {
+            for (AbstractPicture picture : pictures) {
+                if (picture instanceof EdgePicture) {
+                    edges.add((EdgePicture) picture);
+                }
+            }
+        }
+        return edges;
+    }
+    
+    
     private void vertexPictureClicked(VertexPicture vertexPicture, int count) {
         if (count == 1) {
             setSelected(vertexPicture);
@@ -763,9 +752,8 @@ public class DiagramComponent extends JComponent {
      * @return Top most VertexPicture with point inside.
      */
     private VertexPicture getVertexPicture(Point point) {
-        Iterator<AbstractPicture> it = pictures.descendingIterator();
-        while (it.hasNext()) {
-            AbstractPicture picture = it.next();
+        for (int i = pictures.size() - 1; i > 0; --i) {
+            AbstractPicture picture = pictures.get(i);
             if (picture instanceof VertexPicture) {
                 Location location = ((VertexPicture) picture).locationOf(point);
                 if (location != Location.EXTERN) {
@@ -799,21 +787,25 @@ public class DiagramComponent extends JComponent {
     private void moveToEndOfList(VertexPicture vertexPicture) {
         ArrayList<AbstractPicture> picturesToMove = new ArrayList<>();
         picturesToMove.add(vertexPicture);
-        for (AbstractPicture picture : pictures) {
-            if (picture instanceof EdgePicture && (((EdgePicture) picture).getOriginPicture() == vertexPicture || ((EdgePicture) picture).getTerminusPicture() == vertexPicture)) {
-                picturesToMove.add(picture);
+        synchronized (pictures) {
+            for (AbstractPicture picture : pictures) {
+                if (picture instanceof EdgePicture && (((EdgePicture) picture).getOriginPicture() == vertexPicture || ((EdgePicture) picture).getTerminusPicture() == vertexPicture)) {
+                    picturesToMove.add(picture);
+                }
             }
+            pictures.removeAll(picturesToMove);
+            pictures.addAll(picturesToMove);
         }
-        pictures.removeAll(picturesToMove);
-        pictures.addAll(picturesToMove);
     }
     
     
     private ArrayList<VertexPicture> containedVertices(VertexPicture container) {
         ArrayList<VertexPicture> contained = new ArrayList<>();
-        for (AbstractPicture picture : pictures) {
-            if (picture instanceof VertexPicture && findContainer((VertexPicture) picture) == container) {
-                contained.add((VertexPicture) picture);
+        synchronized (pictures) {
+            for (AbstractPicture picture : pictures) {
+                if (picture instanceof VertexPicture && findContainer((VertexPicture) picture) == container) {
+                    contained.add((VertexPicture) picture);
+                }
             }
         }
         return contained;
@@ -1093,14 +1085,14 @@ public class DiagramComponent extends JComponent {
     
     private final GraphEditor editor;
     private final DiagramPage page;
-    private final LinkedList<AbstractPicture> pictures = new LinkedList<>();
+    private final java.util.List<AbstractPicture> pictures = Collections.synchronizedList(new ArrayList<>());
 
     private AbstractPicture selectedPicture;
 
     private DragInfo dragInfo;     
     private HoverInfo hoverInfo;
     
-    private final Map<AbstractPicture, Collection<DrawStyle>> highlights = new HashMap<>();
+    private final Map<AbstractPicture, Collection<DrawStyle>> highlights = Collections.synchronizedMap(new HashMap<>());
 
     private Point attachmentPoint;
     

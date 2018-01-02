@@ -523,7 +523,10 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
     
     private void deleteDiagramMenuItem_actionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteDiagramMenuItem_actionPerformed
-        diagramTabbedPane.remove(diagramTabbedPane.getSelectedComponent());
+        int index = diagramTabbedPane.getSelectedIndex();
+        DiagramComponent diagramComponent = getDiagramComponent(index);
+        diagramTabbedPane.remove(index);
+        book.removePage(diagramComponent.getPage());
         vertexTreePanel.rebuild();        
     }//GEN-LAST:event_deleteDiagramMenuItem_actionPerformed
 
@@ -628,8 +631,8 @@ public class GraphEditor extends bka.swing.FrameApplication {
             JOptionPane.showMessageDialog(this, "'" + diagramFile.getPath() + "' not found", "File not found", JOptionPane.ERROR_MESSAGE);
             resetDiagramFile();
         }
-        catch (RuntimeException ex) {
-            Logger.getLogger(GraphEditor.class.getName()).log(Level.SEVERE, diagramFile.toString(), ex);
+        catch (RuntimeException | Error e) {
+            Logger.getLogger(GraphEditor.class.getName()).log(Level.SEVERE, diagramFile.toString(), e);
             JOptionPane.showMessageDialog(this, "Error loading '" + diagramFile.getPath() + "'", "File error", JOptionPane.ERROR_MESSAGE);
             resetDiagramFile();
         }
@@ -644,8 +647,8 @@ public class GraphEditor extends bka.swing.FrameApplication {
             Logger.getLogger(GraphEditor.class.getName()).log(Level.SEVERE, diagramFile.toString(), ex);
             JOptionPane.showMessageDialog(this, "Could not save '" + diagramFile.getPath() + "'", "File error", JOptionPane.ERROR_MESSAGE);
         }
-        catch (RuntimeException ex) {
-            Logger.getLogger(GraphEditor.class.getName()).log(Level.SEVERE, diagramFile.toString(), ex);
+        catch (RuntimeException | Error e) {
+            Logger.getLogger(GraphEditor.class.getName()).log(Level.SEVERE, diagramFile.toString(), e);
             JOptionPane.showMessageDialog(this, "Error saving '" + diagramFile.getPath() + "'", "File error", JOptionPane.ERROR_MESSAGE);
         }
     }

@@ -68,6 +68,11 @@ public class Book {
     public void addPage(DiagramPage page) {
         pages.add(page);
     }
+    
+    
+    public void removePage(DiagramPage page) {
+        pages.remove(page);
+    }
 
 
     public int getPageIndex() {

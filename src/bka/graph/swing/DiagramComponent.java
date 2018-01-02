@@ -130,6 +130,11 @@ public class DiagramComponent extends JComponent {
             }
         }
     }
+    
+    
+    DiagramPage getPage() {
+        return page;
+    }
 
     
     DrawHistory getDrawHistory() {
@@ -778,7 +783,7 @@ public class DiagramComponent extends JComponent {
      * @return Top most VertexPicture with point inside.
      */
     private VertexPicture getVertexPicture(Point point) {
-        for (int i = pictures.size() - 1; i > 0; --i) {
+        for (int i = pictures.size() - 1; i >= 0; --i) {
             AbstractPicture picture = pictures.get(i);
             if (picture instanceof VertexPicture) {
                 Location location = ((VertexPicture) picture).locationOf(point);

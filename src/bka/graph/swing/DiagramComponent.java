@@ -170,12 +170,12 @@ public class DiagramComponent extends JComponent {
 
     void removeVertex(VertexPicture vertexPicture) {
         Collection<EdgePicture> edgePictures = allEdgePictures(vertexPicture);
-        for (EdgePicture edgePicture : edgePictures) {
-            page.remove(edgePicture);
-            editor.vertexPictureRemoved(vertexPicture);
-            pictures.remove(edgePicture);
-        }
         synchronized (lock) {
+            for (EdgePicture edgePicture : edgePictures) {
+                page.remove(edgePicture);
+                editor.vertexPictureRemoved(vertexPicture);
+                pictures.remove(edgePicture);
+            }
             pictures.remove(vertexPicture);
             page.remove(vertexPicture);
         }
@@ -378,11 +378,13 @@ public class DiagramComponent extends JComponent {
 
     private ArrayList<EdgePicture> getEdgePictures() {
         ArrayList<EdgePicture> edges = new ArrayList<>();
-        for (AbstractPicture picture : pictures) {
-            if (picture instanceof EdgePicture) {
-                edges.add((EdgePicture) picture);
+        synchronized (lock) {
+            for (AbstractPicture picture : pictures) {
+                if (picture instanceof EdgePicture) {
+                    edges.add((EdgePicture) picture);
+                }
             }
-        }
+    }
         return edges;
     }
     

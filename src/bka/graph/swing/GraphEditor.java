@@ -477,7 +477,8 @@ public class GraphEditor extends bka.swing.FrameApplication {
         if (evt.getButton() == MouseEvent.BUTTON3 && evt.getClickCount() == 1) {
             diagramMoveLeftMenuItem.setEnabled(0 < index);
             diagramMoveRightMenuItem.setEnabled(index < diagramTabbedPane.getTabCount() - 1);
-            diagramPopupMenu.show(this, evt.getX(), evt.getY());
+            Rectangle bounds = diagramTabbedPane.getBounds();
+            diagramPopupMenu.show(this, bounds.x + evt.getX(), bounds.y + evt.getY());
         }
     }//GEN-LAST:event_diagramTabbedPane_mouseClicked
 

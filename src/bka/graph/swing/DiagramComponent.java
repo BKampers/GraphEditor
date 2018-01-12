@@ -389,18 +389,18 @@ public class DiagramComponent extends JComponent {
     }
     
     
-    private void vertexPictureClicked(VertexPicture vertexPicture, int count) {
-        if (count == 1) {
+    private void vertexPictureClicked(VertexPicture vertexPicture, MouseEvent evt) {
+        if (evt.getClickCount() == 1) {
             setSelected(vertexPicture);
         }
         else {
             editPanel = vertexPicture.getEditPanel();
             if (editPanel != null) {
-                openDialog(vertexDialogTitle(vertexPicture.getVertex()));
+                openDialog(evt, vertexDialogTitle(vertexPicture.getVertex()));
                 editor.vertexPictureModified(vertexPicture);
             }                
         }
-        editor.vertexPictureClicked(vertexPicture, count);
+        editor.vertexPictureClicked(vertexPicture, evt.getClickCount());
     }
     
     
@@ -482,14 +482,14 @@ public class DiagramComponent extends JComponent {
     }
 
 
-    private void edgePictureClicked(EdgePicture edgePicture, int count) {
-        if (count == 1) {
+    private void edgePictureClicked(EdgePicture edgePicture, MouseEvent evt) {
+        if (evt.getClickCount() == 1) {
             setSelected(edgePicture);
         }
         else {
             editPanel = edgePicture.getEditPanel();
             if (editPanel != null) {
-                openDialog(edgeDialogTitle(edgePicture.getEdge()));
+                openDialog(evt, edgeDialogTitle(edgePicture.getEdge()));
                 editor.edgePictureModified(edgePicture);
             }
         }
@@ -671,10 +671,10 @@ public class DiagramComponent extends JComponent {
     }
     
     
-    private void openDialog(String dialogTitle) {
+    private void openDialog(MouseEvent evt, String dialogTitle) {
         editPanel.setEnvironment(editor);
         EditDialog dialog = new EditDialog(editor, dialogTitle, editPanel);
-        dialog.setVisible(true);
+        dialog.show(evt.getLocationOnScreen());
         repaint(); // Any picture might be changed, repaint entire diagram.
     }
 
@@ -695,20 +695,20 @@ public class DiagramComponent extends JComponent {
     }
 
 
-    private void diagramClicked(int count, Point point) {
+    private void diagramClicked(MouseEvent evt) {
         Class vertexPictureClass = editor.selectedVertexPictureClass();
-        if (count == 1 && vertexPictureClass != null) {
-            addNewVertexPicture(vertexPictureClass, point);
+        if (evt.getClickCount() == 1 && vertexPictureClass != null) {
+            addNewVertexPicture(vertexPictureClass, evt.getPoint());
         }
         else {
-            EdgePicture edgePicture = getEdgePicture(point);
+            EdgePicture edgePicture = getEdgePicture(evt.getPoint());
             if (edgePicture != null) {
-                edgePictureClicked(edgePicture, count);
+                edgePictureClicked(edgePicture, evt);
             }
             else {
-                VertexPicture vertexPicture = getVertexPicture(point);
+                VertexPicture vertexPicture = getVertexPicture(evt.getPoint());
                 if (vertexPicture != null) {
-                    vertexPictureClicked(vertexPicture, count);
+                    vertexPictureClicked(vertexPicture, evt);
                 }
             }
         }
@@ -1032,7 +1032,7 @@ public class DiagramComponent extends JComponent {
             requestFocus();
             switch (evt.getButton()) {
                 case MouseEvent.BUTTON1:
-                    diagramClicked(evt.getClickCount(), evt.getPoint());
+                    diagramClicked(evt);
                     break;
                 case MouseEvent.BUTTON3:
                     popupContextMenu(evt.getPoint());

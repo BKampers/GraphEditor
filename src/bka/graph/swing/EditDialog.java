@@ -25,6 +25,12 @@ public class EditDialog extends JDialog {
     }
     
     
+    public void show(Point point) {
+        setLocation(point);
+        setVisible(true);
+    }
+    
+    
     public void enableOkButton(boolean enabled) {
         okButton.setEnabled(enabled);
     }

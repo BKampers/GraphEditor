@@ -19,6 +19,17 @@ import javax.swing.event.*;
 public class GraphEditor extends bka.swing.FrameApplication {
 
 
+    public interface Listener {
+        void vertexPictureAdded(VertexPicture picture);
+        void vertexPictureModified(VertexPicture picture);
+        void vertexPictureRemoved(VertexPicture picture);
+        void vertexPictureClicked(VertexPicture picture, int count);
+        void edgePictureAdded(EdgePicture picture);
+        void edgePictureModified(EdgePicture picture);
+        void edgePictureRemoved(EdgePicture picture);
+        void edgePictureClicked(EdgePicture picture, int count);
+    }
+    
     public interface ContextDelegate {
         java.util.List<JMenuItem> getVertexMenuItems(VertexPicture picture);
         java.util.List<JMenuItem> getEdgeMenuItems(EdgePicture picture);
@@ -37,6 +48,11 @@ public class GraphEditor extends bka.swing.FrameApplication {
         diagramSplitPane.setLeftComponent(vertexTreePanel);
         diagramTabbedPane.addChangeListener(new DiagramTabChangeListener());
         documentPanelPanel.add(historyPanel);
+    }
+    
+    
+    public void setListener(Listener listener) {
+        this.listener = listener;
     }
 
 
@@ -103,6 +119,65 @@ public class GraphEditor extends bka.swing.FrameApplication {
         getSelectedDiagramComponent().clearHoverInfo();
     }
     
+
+    void vertexPictureAdded(DiagramComponent diagramComponent, VertexPicture picture) {
+        vertexTreePanel.vertexAdded(picture, getSelectedDiagramComponent());
+        if (listener != null) {
+            listener.vertexPictureAdded(picture);
+        }
+    }
+    
+    
+    void vertexPictureRemoved(VertexPicture picture) {
+        vertexTreePanel.vertexRemoved(picture);
+        if (listener != null) {
+            listener.vertexPictureRemoved(picture);
+        }
+    }
+    
+    
+    void vertexPictureModified(VertexPicture picture) {
+        vertexTreePanel.vertexModified(picture);
+        if (listener != null) {
+            listener.vertexPictureModified(picture);
+        }
+    }
+    
+
+    void vertexPictureClicked(VertexPicture picture, int count) {        
+        if (listener != null) {
+            listener.vertexPictureClicked(picture, count);
+        }
+    }
+
+
+    void edgePictureAdded(DiagramComponent diagramComponent, EdgePicture picture) {
+        if (listener != null) {
+            listener.edgePictureAdded(picture);
+        }
+    }
+
+
+    void edgePictureModified(EdgePicture picture) {
+        if (listener != null) {
+            listener.edgePictureModified(picture);
+        }
+    }
+
+
+    void edgePictureRemoved(EdgePicture picture) {
+        if (listener != null) {
+            listener.edgePictureAdded(picture);
+        }
+    }
+
+    
+    void edgePictureClicked(EdgePicture picture, int count) {        
+        if (listener != null) {
+            listener.edgePictureClicked(picture, count);
+        }
+    }
+
 
     JPopupMenu getVertexMenu(VertexPicture picture) {
         return createPopupMenu(getContextDelegate().getVertexMenuItems(picture));
@@ -172,37 +247,6 @@ public class GraphEditor extends bka.swing.FrameApplication {
     @Override
     protected void closing() {
         setProperty(SPLIT_DIVIDER_PROPERTY, String.valueOf(diagramSplitPane.getDividerLocation()));
-    }
-
-    
-    protected void vertexPictureAdded(DiagramComponent diagramComponent, VertexPicture vertexPicture) {
-        vertexTreePanel.vertexAdded(vertexPicture, getSelectedDiagramComponent());
-    }
-    
-    
-    protected void vertexPictureRemoved(VertexPicture vertexPicture) {
-        vertexTreePanel.vertexRemoved(vertexPicture);
-    }
-    
-    
-    protected void vertexPictureModified(VertexPicture vertexPicture) {
-        vertexTreePanel.vertexModified(vertexPicture);
-    }
-    
-
-    protected void vertexPictureClicked(VertexPicture vertexPicture, int count) {
-    }
-
-
-    protected void edgePictureAdded(DiagramComponent diagramComponent, EdgePicture edgePicture) {
-    }
-
-
-    protected void edgePictureModified(EdgePicture edgePicture) {
-    }
-
-
-    protected void edgePictureRemoved(EdgePicture edgePicture) {
     }
 
     
@@ -799,6 +843,8 @@ public class GraphEditor extends bka.swing.FrameApplication {
 
 
     private File diagramFile;
+    
+    private Listener listener;
     
     private static final String XML_EXTENSION = "xml";
     private static final javax.swing.filechooser.FileNameExtensionFilter XML_FILE_FILTER = new javax.swing.filechooser.FileNameExtensionFilter("XML Graphs", XML_EXTENSION);

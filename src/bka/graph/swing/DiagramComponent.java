@@ -493,10 +493,12 @@ public class DiagramComponent extends JComponent {
                 editor.edgePictureModified(edgePicture);
             }
         }
+        editor.edgePictureClicked(edgePicture, evt.getClickCount());
     }
 
 
     private void removePicture(AbstractPicture picture) {
+        highlights.remove(picture);
         if (picture instanceof VertexPicture) {
             removeVertex((VertexPicture) picture);
         }

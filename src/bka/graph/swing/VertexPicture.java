@@ -34,14 +34,12 @@ public class VertexPicture extends AbstractPicture {
 
     
     public Point getLocation() {
-        return location;
+        return new Point(location);
     }
     
     
     public void setLocation(Point location) {
-        this.location = location;
-        initAttachmentPoints();
-        clearShape();
+        setLocation(location.x, location.y);
     }
     
     
@@ -354,9 +352,16 @@ public class VertexPicture extends AbstractPicture {
             layout.draw(g2d, x, y);
         }
     }
+    
+    
+   private void setLocation(int x, int y) {
+        location = new Point(x, y);
+        initAttachmentPoints();
+        clearShape();
+    }
 
-
-     private int resizeWidth(Point point) {
+    
+   private int resizeWidth(Point point) {
         return Math.abs(point.x - location.x) * 2;
     }
 
@@ -385,7 +390,7 @@ public class VertexPicture extends AbstractPicture {
      
     protected Dimension size;
 
-    private Paint fillPaint = null;
+    private Paint fillPaint;
     
     private static final int LOCATION_NEAR_DISTANCE = 3;
     private static final int ATTACHMENT_NEAR_DISTANCE = 100;

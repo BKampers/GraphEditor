@@ -119,14 +119,24 @@ public class DiagramComponent extends JComponent {
             for (Map.Entry<AbstractPicture, Collection<DrawStyle>> highlight : highlights.entrySet()) {
                 paintHighlight(g2d, highlight.getKey(), highlight.getValue());
             }
+            g2d.setColor(SELECTION_COLOR);
+            g2d.setStroke(SELECTION_STROKE);
             if (selectedPicture != null) {
-                g2d.setColor(SELECTION_COLOR);
-                g2d.setStroke(SELECTION_STROKE);
                 g2d.draw(selectedPicture.getShape());
+            }
+            for (VertexPicture vertexPicture : selectedVertices) {
+                g2d.draw(vertexPicture.getShape());
             }
             if (attachmentPoint != null) {
                 g2d.setColor(attachmentPointColor);
                 g2d.fillOval(attachmentPoint.x - attachmentPointWidth / 2, attachmentPoint.y - attachmentPointHeight / 2, attachmentPointWidth, attachmentPointHeight);
+            }
+            if (dragInfo != null && dragInfo.vertexInfos.isEmpty() && dragInfo.edgeInfo == null) {
+                Rectangle rectangle = dragInfo.getRectangle();
+                if (rectangle != null) {
+                    g2d.setColor(Color.LIGHT_GRAY);
+                    g2d.drawRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+                }
             }
         }
     }
@@ -435,31 +445,48 @@ public class DiagramComponent extends JComponent {
     private void startDrag(Point point) {
         dragInfo = new DragInfo();
         dragInfo.startPoint = point;
-        Class edgePictureClass = editor.selectedEdgePictureClass();
-        if (attachmentPoint != null && edgePictureClass != null) {
-            startNewEdgeDrag(edgePictureClass);
+        if (hoverInfo != null && hoverInfo.location == Location.INTERIOR && selectedVertices.contains(hoverInfo.picture)) {
+            for (VertexPicture vertexPicture : selectedVertices) {
+                VertexDragInfo info = new VertexDragInfo();
+                info.picture = vertexPicture;
+                dragInfo.vertexInfos.add(info);
+            }
+            initializeVertexDragging();
         }
         else {
-            EdgePicture edgePicture = getEdgePicture(dragInfo.startPoint);
-            if (edgePicture != null) {
-                startEdgeDrag(edgePicture);
+            selectedVertices.clear();
+            Class edgePictureClass = editor.selectedEdgePictureClass();
+            if (attachmentPoint != null && edgePictureClass != null) {
+                startNewEdgeDrag(edgePictureClass);
             }
             else {
-                VertexPicture vertexPicture = getVertexPicture(dragInfo.startPoint);
-                if (vertexPicture != null) {
-                    startVertexDrag(vertexPicture);
-                }
+                startHoveredPictureDrag(point);
+            }
+        }
+    }
+
+    
+    private void startHoveredPictureDrag(Point point) {
+        EdgePicture edgePicture = getEdgePicture(point);
+        if (edgePicture != null) {
+            startEdgeDrag(edgePicture);
+        }
+        else {
+            VertexPicture vertexPicture = getVertexPicture(point);
+            if (vertexPicture != null) {
+                startVertexDrag(vertexPicture);
             }
         }
     }
 
 
     private void startNewEdgeDrag(Class edgePictureClass) {
-        dragInfo.edge = new EdgeDragInfo();
+        EdgeDragInfo info = new EdgeDragInfo();
         try {
-            dragInfo.edge.initializeNewEdgeDrag(edgePictureClass);
-            pictures.add(dragInfo.edge.picture);
-            selectedPicture = dragInfo.edge.picture;
+            info.initializeNewEdgeDrag(edgePictureClass);
+            pictures.add(info.picture);
+            selectedPicture = info.picture;
+            dragInfo.edgeInfo = info;
             repaint();
         }
         catch (ReflectiveOperationException ex) {
@@ -470,14 +497,16 @@ public class DiagramComponent extends JComponent {
 
 
     private void startEdgeDrag(EdgePicture edgePicture) {
-        dragInfo.edge = new EdgeDragInfo();
-        dragInfo.edge.initializeDrag(edgePicture);
+        EdgeDragInfo info = new EdgeDragInfo();
+        info.initializeDrag(edgePicture);
+        dragInfo.edgeInfo = info;
     }
 
 
     private void startVertexDrag(VertexPicture vertexPicture) {
-        dragInfo.vertex = new VertexDragInfo();
-        dragInfo.vertex.picture = vertexPicture;
+        VertexDragInfo info = new VertexDragInfo();
+        info.picture = vertexPicture;
+        dragInfo.vertexInfos.add(info);
         initializeVertexDragging();
     }
 
@@ -510,7 +539,7 @@ public class DiagramComponent extends JComponent {
 
     private void cleanupEdges() {
         for (EdgePicture edgePicture : getEdgePictures()) {
-            if (edgePicture.getOriginPicture() == dragInfo.vertex.picture || edgePicture.getTerminusPicture() == dragInfo.vertex.picture) {
+            if (dragInfo.contains(edgePicture.getOriginPicture()) || dragInfo.contains(edgePicture.getTerminusPicture())) {
                 edgePicture.cleanup();
             }
         }
@@ -518,8 +547,8 @@ public class DiagramComponent extends JComponent {
     
 
     private void dragEdge(Point point) {
-        if (dragInfo.edge.picture.hasDragPoint()) {
-            dragInfo.edge.picture.setDragLocation(point);
+        if (dragInfo.edgeInfo.picture.hasDragPoint()) {
+            dragInfo.edgeInfo.picture.setDragLocation(point);
         }
         else {
             VertexPicture vertexPicture = getVertexPicture(point);
@@ -529,27 +558,28 @@ public class DiagramComponent extends JComponent {
             else {
                 attachmentPoint = null;
             }
-            if (dragInfo.edge.picture.getTerminusPicture() == null) {
-                dragInfo.edge.picture.setEndPoint(point);
+            if (dragInfo.edgeInfo.picture.getTerminusPicture() == null) {
+                dragInfo.edgeInfo.picture.setEndPoint(point);
             }
         }
-        setComponentSize(dragInfo.edge.picture.xEast(), dragInfo.edge.picture.ySouth());
-        repaint();
+        setComponentSize(dragInfo.edgeInfo.picture.xEast(),dragInfo.edgeInfo.picture.ySouth());
     }
 
 
     private void finishVertexDragging() {
         cleanupEdges();
-        dragInfo.vertex.addMutationToHistory();
+        for (VertexDragInfo info : dragInfo.vertexInfos) {
+            info.addMutationToHistory();
+        }
     }
 
 
-    private void finishEdgeDragging(Point point) {
-        if (dragInfo.edge.picture.hasDragPoint()) {
-            dragInfo.edge.finishDrag();
+    private void finishEdgeDragging() {
+        if (dragInfo.edgeInfo.picture.hasDragPoint()) {
+            dragInfo.edgeInfo.finishDrag();
         }
-        else if (! finalizeNewEdge(point)) {
-            pictures.remove(dragInfo.edge.picture);
+        else if (! finalizeNewEdge(dragInfo.endPoint)) {
+            pictures.remove(dragInfo.edgeInfo.picture);
             selectedPicture = null;
         }
     }
@@ -559,11 +589,11 @@ public class DiagramComponent extends JComponent {
         VertexPicture terminusPicture = getVertexPicture(point);
         if (terminusPicture != null) {
             int terminusAttachmentIndex = terminusPicture.nearestAttachmentIndex(point);
-            if (terminusAttachmentIndex >= 0 && ! dragInfo.edge.picture.hasOrigin(terminusPicture, terminusAttachmentIndex)) {
-                dragInfo.edge.picture.setTerminus(terminusPicture, terminusAttachmentIndex);
-                page.add(dragInfo.edge.picture);
-                editor.edgePictureAdded(this, dragInfo.edge.picture);
-                drawHistory.addEdgeInsertion(dragInfo.edge.picture);
+            if (terminusAttachmentIndex >= 0 && ! dragInfo.edgeInfo.picture.hasOrigin(terminusPicture, terminusAttachmentIndex)) {
+                dragInfo.edgeInfo.picture.setTerminus(terminusPicture, terminusAttachmentIndex);
+                page.add(dragInfo.edgeInfo.picture);
+                editor.edgePictureAdded(this, dragInfo.edgeInfo.picture);
+                drawHistory.addEdgeInsertion(dragInfo.edgeInfo.picture);
                 return true;
             }
         }
@@ -572,37 +602,52 @@ public class DiagramComponent extends JComponent {
 
     
     private void initializeVertexDragging() {
-        if (hoverInfo != null && hoverInfo.location == Location.INTERIOR) {
-            ensureDrawnLast(dragInfo.vertex.picture);
-            dragInfo.vertex.distance = new Point(dragInfo.vertex.picture.getLocation().x - dragInfo.startPoint.x, dragInfo.vertex.picture.getLocation().y - dragInfo.startPoint.y);
+        for (VertexDragInfo info : dragInfo.vertexInfos) {
+            if (hoverInfo == null || hoverInfo.location == Location.INTERIOR) {
+                ensureDrawnLast(info.picture);
+                Point pictureLoacation = info.picture.getLocation();
+                info.distance = new Point(pictureLoacation.x - dragInfo.startPoint.x, pictureLoacation.y - dragInfo.startPoint.y);
+            }
+            info.originalLocation = info.picture.getLocation();
+            info.originalSize = info.picture.getSize();
         }
-        dragInfo.vertex.originalLocation = dragInfo.vertex.picture.getLocation();
-        dragInfo.vertex.originalSize = dragInfo.vertex.picture.getSize();
     }
 
     
     private void dragVertex(Point point) {
-        if (hoverInfo.location == Location.INTERIOR) {
-            setCursor(Cursor.MOVE_CURSOR);
-            moveDraggingVertexPicture(new Point(point.x + dragInfo.vertex.distance.x, point.y + dragInfo.vertex.distance.y));
-        }
-        else {
-            dragInfo.vertex.picture.resize(hoverInfo.location, point);
-            correctEndPoints(dragInfo.vertex.picture);
+        for (VertexDragInfo info : dragInfo.vertexInfos) {
+            if (hoverInfo.location == Location.INTERIOR) {
+                setCursor(Cursor.MOVE_CURSOR);
+                moveDraggingVertexPicture(info, new Point(point.x + info.distance.x, point.y + info.distance.y));
+            }
+            else {
+                info.picture.resize(hoverInfo.location, point);
+                correctEndPoints(info.picture);
+            }
         }
         if (attachmentPoint != null) {
             attachmentPoint = null;
         }
-        repaint();
     }
 
     
-    private void moveDraggingVertexPicture(Point destination) {
-        Point containerPoint = dragInfo.vertex.picture.getLocation();
+    private void moveDraggingVertexPicture(VertexDragInfo info, Point destination) {
+        Point containerPoint = info.picture.getLocation();
         int δx = destination.x - containerPoint.x;
         int δy = destination.y - containerPoint.y;
-        setVertexLocation(dragInfo.vertex.picture, destination);
-        moveContainedPictures(dragInfo.vertex.picture, δx, δy);
+        setVertexLocation(info.picture, destination);
+        moveContainedPictures(info.picture, δx, δy);
+    }
+
+    
+    private void selectPictures() {
+        Rectangle rectangle = dragInfo.getRectangle();
+        selectedVertices .clear();
+        for (VertexPicture picture : getVertexPictures()) {
+            if (rectangle.intersects(picture.bounds())) {
+                selectedVertices.add(picture);
+            }
+        }
     }
 
 
@@ -906,9 +951,27 @@ public class DiagramComponent extends JComponent {
 
 
     private class DragInfo {
-        VertexDragInfo vertex;
-        EdgeDragInfo edge;
+        
+        Rectangle getRectangle() {
+             if (endPoint == null) {
+                 return null;
+             }
+            return new Rectangle(startPoint.x, startPoint.y, endPoint.x - startPoint.x, endPoint.y - startPoint.y);
+        }
+        
+        boolean contains(VertexPicture vertexPicture) {
+            for (VertexDragInfo info : vertexInfos) {
+                if (info.picture == vertexPicture) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        Collection<VertexDragInfo> vertexInfos = new ArrayList<>();
+        EdgeDragInfo edgeInfo;
         Point startPoint;
+        Point endPoint;
     }
 
 
@@ -1009,7 +1072,7 @@ public class DiagramComponent extends JComponent {
 
         @Override
         public void mousePressed(MouseEvent evt) {
-            if (evt.getButton() == MouseEvent.BUTTON1) {
+            if (dragInfo == null && evt.getButton() == MouseEvent.BUTTON1) {
                 startDrag(evt.getPoint());
             }
         }
@@ -1017,11 +1080,15 @@ public class DiagramComponent extends JComponent {
         @Override
         public void mouseReleased(MouseEvent evt) {
             if (dragInfo != null && evt.getButton() == MouseEvent.BUTTON1) {
-                if (dragInfo.vertex != null) {
+                dragInfo.endPoint = evt.getPoint();
+                if (! dragInfo.vertexInfos.isEmpty()) {
                     finishVertexDragging();
                 }
-                if (dragInfo.edge != null) {
-                    finishEdgeDragging(evt.getPoint());
+                else if (dragInfo.edgeInfo != null) {
+                    finishEdgeDragging();
+                }
+                else {
+                    selectPictures();
                 }
                 dragInfo = null;
                 setCursor(Cursor.DEFAULT_CURSOR);
@@ -1050,12 +1117,14 @@ public class DiagramComponent extends JComponent {
         @Override
         public void mouseDragged(MouseEvent evt) {
             if (dragInfo != null) {
-                if (dragInfo.vertex != null) {
+                dragInfo.endPoint = evt.getPoint();
+                if (! dragInfo.vertexInfos.isEmpty() /*&& dragInfo.containsHoveredPicture()*/) {
                     dragVertex(evt.getPoint());
                 }
-                else if (dragInfo.edge != null) {
+                if (dragInfo.edgeInfo != null) {
                     dragEdge(evt.getPoint());
                 }
+                repaint();
             }
         }
         
@@ -1133,6 +1202,7 @@ public class DiagramComponent extends JComponent {
     
     private final Object lock = new Object();
 
+    private final Collection<VertexPicture> selectedVertices = new ArrayList<>();
     private final Color attachmentPointColor = Color.RED;
     private final int attachmentPointWidth = 4;
     private final int attachmentPointHeight = 4;

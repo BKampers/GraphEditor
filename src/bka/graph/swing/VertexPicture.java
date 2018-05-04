@@ -34,12 +34,14 @@ public class VertexPicture extends AbstractPicture {
 
     
     public Point getLocation() {
-        return new Point(location);
+        return location;
     }
     
     
     public void setLocation(Point location) {
-        setLocation(location.x, location.y);
+        this.location = location;
+        initAttachmentPoints();
+        clearShape();
     }
     
     
@@ -353,13 +355,6 @@ public class VertexPicture extends AbstractPicture {
         }
     }
     
-    
-   private void setLocation(int x, int y) {
-        location = new Point(x, y);
-        initAttachmentPoints();
-        clearShape();
-    }
-
     
    private int resizeWidth(Point point) {
         return Math.abs(point.x - location.x) * 2;

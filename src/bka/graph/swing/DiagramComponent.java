@@ -568,9 +568,7 @@ public class DiagramComponent extends JComponent {
 
     private void finishVertexDragging() {
         cleanupEdges();
-        for (VertexDragInfo info : dragInfo.vertexInfos) {
-            info.addMutationToHistory();
-        }
+        addVertexDragInfosToDrawHistory();
     }
 
 
@@ -689,6 +687,23 @@ public class DiagramComponent extends JComponent {
         }
     }
     
+    
+    private void addVertexDragInfosToDrawHistory() {
+        Map<VertexPicture, Point> relocatedPictures = new HashMap<>();
+        Map<VertexPicture, Dimension> resizedPictures = new HashMap<>();
+        for (VertexDragInfo info : dragInfo.vertexInfos) {
+            VertexPicture container = findContainer(info.picture);
+            if (info.relocated() && ! dragInfo.contains(container)) {
+                relocatedPictures.put(info.picture, info.originalLocation);
+            }
+            if (info.resized()) {
+                resizedPictures.put(info.picture, info.originalSize);
+            }
+        }
+        drawHistory.addVertexRelocations(relocatedPictures);
+        drawHistory.addVertexResizements(resizedPictures);
+    }
+
     
     private void setAttachmentPoint(AbstractPicture picture, Point point) {
         if (picture instanceof VertexPicture && editor.selectedEdgePictureClass() != null) {
@@ -987,15 +1002,6 @@ public class DiagramComponent extends JComponent {
 
         boolean resized() {
             return ! originalSize.equals(picture.getSize());
-        }
-
-        void addMutationToHistory() {
-            if (relocated()) {
-                drawHistory.addVertexRelocation(picture, originalLocation);
-            }
-            if (resized()) {
-                drawHistory.addVertexResizement(picture, originalSize);
-            }
         }
 
     }

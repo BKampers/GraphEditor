@@ -6,7 +6,6 @@ package bka.graph.swing;
 
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 
 class DrawHistory {
@@ -36,7 +35,7 @@ class DrawHistory {
     }
 
 
-    List<Mutation> getMutattions() {
+    java.util.List<Mutation> getMutattions() {
         return Collections.unmodifiableList(history);
     }
 
@@ -51,13 +50,17 @@ class DrawHistory {
     }
 
 
-    void addVertexRelocation(VertexPicture picture, Point originalLocation) {
-        addToHistory(new VertexRelocation(picture, originalLocation));
+    void addVertexRelocations(Map<VertexPicture, Point> relocations) {
+        if (! relocations.isEmpty()) {
+            addToHistory(new VertexRelocation(relocations));
+        }
     }
 
 
-    void addVertexResizement(VertexPicture picture, Dimension originalSize) {
-        addToHistory(new VertexResizement(picture, originalSize));
+    void addVertexResizements(Map<VertexPicture, Dimension> resizements) {
+        if (! resizements.isEmpty()) {
+            addToHistory(new VertexResizement(resizements));
+        }
     }
 
 
@@ -192,40 +195,44 @@ class DrawHistory {
 
     private class VertexRelocation extends AbstractMutation {
 
-        VertexRelocation(VertexPicture picture, Point originalLocation) {
-            this.picture = picture;
-            this.originalLocation = originalLocation;
+        VertexRelocation(Map<VertexPicture, Point> relocations) {
+            this.relocations = new HashMap<>(relocations);
         }
 
         @Override
         protected void revert() {
-            Point currentLocation = picture.getLocation();
-            diagramComponent.revertVertexMutation(picture, originalLocation, picture.getSize());
-            originalLocation = currentLocation;
+            for (Map.Entry<VertexPicture, Point> entry : relocations.entrySet()) {
+                VertexPicture picture = entry.getKey();
+                Point originalLocation = entry.getValue();
+                Point currentLocation = picture.getLocation();
+                diagramComponent.revertVertexMutation(picture, originalLocation, picture.getSize());
+                entry.setValue(currentLocation);
+            }
         }
 
-        private final VertexPicture picture;
-        private Point originalLocation;
+        private final Map<VertexPicture, Point> relocations;
 
     }
 
 
     private class VertexResizement extends AbstractMutation {
 
-        public VertexResizement(VertexPicture picture, Dimension originalSize) {
-            this.picture = picture;
-            this.originalSize = originalSize;
+        public VertexResizement(Map<VertexPicture, Dimension> resizements) {
+            this.resizements = new HashMap<>(resizements);
         }
 
         @Override
         protected void revert() {
-            Dimension currentSize = picture.getSize();
-            diagramComponent.revertVertexMutation(picture, picture.getLocation(), originalSize);
-            originalSize = currentSize;
+            for (Map.Entry<VertexPicture, Dimension> entry : resizements.entrySet()) {
+                VertexPicture picture = entry.getKey();
+                Dimension originalSize = entry.getValue();
+                Dimension currentSize = picture.getSize();
+                diagramComponent.revertVertexMutation(picture, picture.getLocation(), originalSize);
+                entry.setValue(currentSize);
+            }
         }
 
-        private final VertexPicture picture;
-        private Dimension originalSize;
+        private final Map<VertexPicture, Dimension> resizements;
 
     }
 

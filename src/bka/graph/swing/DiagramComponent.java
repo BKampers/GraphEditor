@@ -1213,7 +1213,7 @@ public class DiagramComponent extends JComponent {
     private final int attachmentPointWidth = 4;
     private final int attachmentPointHeight = 4;
 
-    private static final Color SELECTION_COLOR = new Color(0, 0, 128, 64);
-    private static final BasicStroke SELECTION_STROKE = new BasicStroke(3.0f);
+    private static final Color SELECTION_COLOR = new Color(0, 0, 255, 64);
+    private static final BasicStroke SELECTION_STROKE = new BasicStroke(5.0f);
 
 }

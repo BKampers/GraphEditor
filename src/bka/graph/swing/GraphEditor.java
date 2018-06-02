@@ -30,10 +30,12 @@ public class GraphEditor extends bka.swing.FrameApplication {
         void edgePictureClicked(EdgePicture picture, int count);
     }
     
+    
     public interface ContextDelegate {
         java.util.List<JMenuItem> getVertexMenuItems(VertexPicture picture);
         java.util.List<JMenuItem> getEdgeMenuItems(EdgePicture picture);
     }
+    
     
     public interface OnLoadDelegate {
         void onLoad();

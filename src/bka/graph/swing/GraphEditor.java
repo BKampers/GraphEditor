@@ -106,7 +106,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
 
-    public void pickColor(AbstractPicture picture, Object key) {
+    public final void pickColor(AbstractPicture picture, Object key) {
         DrawStyle drawStyle = DrawStyleManager.getInstance().getDrawStyle(picture);
         Color color = null;
         if (drawStyle != null) {
@@ -119,6 +119,42 @@ public class GraphEditor extends bka.swing.FrameApplication {
             DrawStyleManager.getInstance().setDrawStyle(picture, drawStyle);
         }
         getSelectedDiagramComponent().clearHoverInfo();
+    }
+    
+
+    public final void setHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
+        DiagramComponent diagramComponent = getDiagramComponent(picture);
+        diagramComponent.setHighlighted(picture, drawStyle);
+        if (indexOf(diagramComponent) == diagramTabbedPane.getSelectedIndex()) {
+            diagramComponent.repaint();
+        }
+    }
+    
+    
+    public final void resetHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
+        DiagramComponent diagramComponent = getDiagramComponent(picture);
+        if (diagramComponent.resetHighlighted(picture, drawStyle) && indexOf(diagramComponent) == diagramTabbedPane.getSelectedIndex()) {
+            diagramComponent.repaint();
+        }
+    }
+
+
+    public final void resetHighlighted(DrawStyle drawStyle) {
+        for (int i = 0; i <  diagramTabbedPane.getTabCount(); ++i) {
+            DiagramComponent diagramComponent = getDiagramComponent(i);
+            if (diagramComponent.resetHighlighted(drawStyle) && i == diagramTabbedPane.getSelectedIndex()) {
+                diagramComponent.repaint();
+            }
+        }
+    }
+
+
+    public final void selectDiagram(AbstractPicture picture) {
+        DiagramComponent diagramComponent = getDiagramComponent(picture);
+        int index = indexOf(diagramComponent);
+        if (index != diagramTabbedPane.getSelectedIndex()) {
+            diagramTabbedPane.setSelectedIndex(index);
+        }
     }
     
 
@@ -252,48 +288,12 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
 
     
-    protected void selectDiagram(AbstractPicture picture) {
-        DiagramComponent diagramComponent = getDiagramComponent(picture);
-        int index = indexOf(diagramComponent);
-        if (index != diagramTabbedPane.getSelectedIndex()) {
-            diagramTabbedPane.setSelectedIndex(index);
-        }
-    }
-    
-
     protected void setHighlighted(Vertex vertex, DrawStyle drawStyle) {
         int count = diagramTabbedPane.getTabCount();
         for (int i = 0; i < count; ++i) {
             boolean vertexHighlighted = getDiagramComponent(i).setHighlighted(vertex, drawStyle);
             if (vertexHighlighted && i == diagramTabbedPane.getSelectedIndex()) {
                 getDiagramComponent(i).repaint();
-            }
-        }
-    }
-
-
-    protected void setHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
-        DiagramComponent diagramComponent = getDiagramComponent(picture);
-        diagramComponent.setHighlighted(picture, drawStyle);
-        if (indexOf(diagramComponent) == diagramTabbedPane.getSelectedIndex()) {
-            diagramComponent.repaint();
-        }
-    }
-    
-    
-    protected void resetHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
-        DiagramComponent diagramComponent = getDiagramComponent(picture);
-        if (diagramComponent.resetHighlighted(picture, drawStyle) && indexOf(diagramComponent) == diagramTabbedPane.getSelectedIndex()) {
-            diagramComponent.repaint();
-        }
-    }
-
-
-    protected void resetHighlighted(DrawStyle drawStyle) {
-        for (int i = 0; i <  diagramTabbedPane.getTabCount(); ++i) {
-            DiagramComponent diagramComponent = getDiagramComponent(i);
-            if (diagramComponent.resetHighlighted(drawStyle) && i == diagramTabbedPane.getSelectedIndex()) {
-                diagramComponent.repaint();
             }
         }
     }

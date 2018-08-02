@@ -27,7 +27,6 @@ public class DiagramComponent extends JComponent {
         setTitle(page.getTitle());
         pictures.addAll(page.getVertices());
         pictures.addAll(page.getEdges());
-        Rectangle bounds = new Rectangle();
         int width = 0;
         int height = 0;
         for (AbstractPicture picture : pictures) {

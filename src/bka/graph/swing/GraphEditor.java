@@ -58,11 +58,6 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
 
 
-    public Book getBook() {
-        return book;
-    }
-
-
     public void addVertexButton(String name, Class vertexPictureClass) {
         JToggleButton button = new JToggleButton(name);
         button.addActionListener(pictureButtonListener);

@@ -18,6 +18,7 @@ public class DiagramComponent extends JComponent {
     
     
     public static final Object HIGHLIGHT_BORDER = "BORDER";
+    public static final Object HIGHLIGHT_TEXT = "TEXT";
     
     
     DiagramComponent(GraphEditor editor, DiagramPage page) {
@@ -389,6 +390,12 @@ public class DiagramComponent extends JComponent {
                 g2d.setStroke(stroke);
                 g2d.draw(picture.getShape());
             }
+            color = style.getColor(HIGHLIGHT_TEXT);
+            String text = style.getText(HIGHLIGHT_TEXT);
+            if (text != null && color != null) {
+                g2d.setPaint(color);
+                g2d.drawString(text, picture.xWest(), picture.ySouth());
+            }
         }
     }
 
@@ -401,7 +408,7 @@ public class DiagramComponent extends JComponent {
                     edges.add((EdgePicture) picture);
                 }
             }
-    }
+        }
         return edges;
     }
     

@@ -241,7 +241,7 @@ public class DiagramComponent extends JComponent {
         synchronized (lock) {
             Collection<DrawStyle> pictureHighlights = highlights.get(picture);
             if (pictureHighlights == null) {
-                pictureHighlights = new ArrayList<>();
+                pictureHighlights = new HashSet<>();
                 highlights.put(picture, pictureHighlights);
             }
             pictureHighlights.add(drawStyle);

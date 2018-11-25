@@ -235,9 +235,8 @@ public class DiagramComponent extends JComponent {
 
 
     void setHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
-        if (picture == null || drawStyle == null) {
-            throw new IllegalArgumentException();
-        }
+        Objects.requireNonNull(picture);
+        Objects.requireNonNull(drawStyle);
         synchronized (lock) {
             Collection<DrawStyle> pictureHighlights = highlights.get(picture);
             if (pictureHighlights == null) {

@@ -741,6 +741,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     
     private DiagramComponent getDiagramComponent(AbstractPicture picture) {
+        Objects.requireNonNull(picture);
         int count = diagramTabbedPane.getTabCount();
         for (int index = 0; index < count; ++index) {
             DiagramComponent diagramComponent = getDiagramComponent(index);
@@ -748,7 +749,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
                 return diagramComponent;
             }
         }
-        return null;
+        throw new IllegalArgumentException("No such picture: " + picture.toString());
     }
     
     

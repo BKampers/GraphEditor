@@ -7,6 +7,7 @@ package bka.graph.swing;
 import bka.awt.*;
 import bka.graph.*;
 import bka.graph.document.*;
+import bka.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
@@ -414,7 +415,12 @@ public class DiagramComponent extends JComponent {
     
     private void vertexPictureClicked(VertexPicture vertexPicture, MouseEvent evt) {
         if (evt.getClickCount() == 1) {
-            setSelected(vertexPicture);
+            if (selectedPicture != vertexPicture) {
+                setSelected(vertexPicture);
+            }
+            else {
+                show(evt, vertexPicture);
+            }
         }
         else {
             editPanel = vertexPicture.getEditPanel();
@@ -424,6 +430,20 @@ public class DiagramComponent extends JComponent {
             }                
         }
         editor.vertexPictureClicked(vertexPicture, evt.getClickCount());
+    }
+    
+    
+    public void show(MouseEvent event, VertexPicture picture) {
+        VertexPopup popup = picture.getPopup();
+        if (popup != null) {
+            DiagramComponent component = (DiagramComponent) event.getSource();
+            PopupTextField popupTextField = new PopupTextField(popup.initialText(), popup.bounds());
+            popupTextField.addListener((String text) -> {
+                popup.apply(text);
+                component.vertexPictureModified(picture);
+            });
+            popupTextField.show(component);
+        }
     }
     
     
@@ -1070,6 +1090,12 @@ public class DiagramComponent extends JComponent {
     }
     
     
+    public void vertexPictureModified(VertexPicture vertexPicture) {
+        repaint();
+        editor.vertexPictureModified(vertexPicture);
+    }
+    
+    
     /**
      * @param edgePicture
      * @return index of last vertex picture from pictures that is origin or terminus of edgePicture
@@ -1174,7 +1200,7 @@ public class DiagramComponent extends JComponent {
                 redoMutation();
             }
         }
-
+        
         private void deleteSelectedPicture() {
             if (selectedPicture != null) {
                 removePicture(selectedPicture);

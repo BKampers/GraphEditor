@@ -5,7 +5,9 @@
 package bka.graph.swing;
 
 import bka.graph.*;
+import bka.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.font.*;
 import java.awt.geom.*;
 import java.awt.image.*;
@@ -198,6 +200,11 @@ public class VertexPicture extends AbstractPicture {
     
     
     protected AbstractEditPanel getEditPanel() {
+        return null;
+    }
+    
+    
+    protected VertexPopup getPopup() {
         return null;
     }
     

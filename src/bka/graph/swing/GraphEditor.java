@@ -7,6 +7,7 @@ package bka.graph.swing;
 import bka.awt.*;
 import bka.graph.*;
 import bka.graph.document.*;
+import bka.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -102,21 +103,11 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
 
     public final void pickColor(AbstractPicture picture, Object key) {
-        DrawStyle drawStyle = DrawStyleManager.getInstance().getDrawStyle(picture);
-        Color color = null;
-        if (drawStyle != null) {
-            color = drawStyle.getColor(key);
-        }
-        Color newColor = JColorChooser.showDialog(this, "Pick Color", color);
-        if (newColor != null) {
-            drawStyle = new DrawStyle(drawStyle);
-            drawStyle.setColor(key, newColor);
-            DrawStyleManager.getInstance().setDrawStyle(picture, drawStyle);
-        }
+        bka.swing.Popup.show(this, new ColorPopupModel(picture, key));
         getSelectedDiagramComponent().clearHoverInfo();
     }
     
-
+   
     public final void setHighlighted(AbstractPicture picture, DrawStyle drawStyle) {
         DiagramComponent diagramComponent = getDiagramComponent(picture);
         diagramComponent.setHighlighted(picture, drawStyle);
@@ -618,17 +609,11 @@ public class GraphEditor extends bka.swing.FrameApplication {
         vertexTreePanel.diagramModified(diagramComponent);
     }
     
+    
     private void renameDiagram() {
-        final int index = diagramTabbedPane.getSelectedIndex();
-        Rectangle bounds = diagramTabbedPane.getBoundsAt(index);
-        bka.swing.PopupTextField popup = new bka.swing.PopupTextField(diagramTabbedPane.getTitleAt(index), bounds, EDIT_MIN_WIDTH);
-        popup.addListener((String text) -> {
-            getDiagramComponent(index).setTitle(text);
-            updateTabTitle(index);
-        });
-        popup.show(diagramTabbedPane);
+        bka.swing.Popup.show(diagramTabbedPane, new TabLabelPopupModel(diagramTabbedPane.getSelectedIndex()));
     }
-
+    
     
     private JPopupMenu createPopupMenu(Collection<JMenuItem> items) {
         JPopupMenu menu = new JPopupMenu();
@@ -809,6 +794,86 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
 
 
+    private class TabLabelPopupModel extends TextFieldPopupModel {
+
+        TabLabelPopupModel(int tabIndex) {
+            this.tabIndex = tabIndex;
+            bounds = diagramTabbedPane.getBoundsAt(tabIndex);
+            bounds.width = Math.max(EDIT_MIN_WIDTH, bounds.width);
+            bounds.height = Math.max(EDIT_MIN_HEIGHT, bounds.height);
+        }
+        
+        @Override
+        public Point getLocation() {
+            return bounds.getLocation();
+        }
+
+        @Override
+        public Dimension getSize() {
+            return bounds.getSize();
+        }
+
+        @Override
+        public String getInitialValue() {
+            return diagramTabbedPane.getTitleAt(tabIndex);
+        }
+
+        @Override
+        public void applyNewValue() {
+            getDiagramComponent(tabIndex).setTitle(getText());
+            updateTabTitle(tabIndex);
+        }
+        
+        private final int tabIndex;
+        private final Rectangle bounds;
+        
+    }
+
+    
+    private class ColorPopupModel extends ColorChooserPopupModel {
+
+        ColorPopupModel(AbstractPicture picture, Object key) {
+            this.picture = picture;
+            this.key = key;
+        }
+        
+        @Override
+        public Point getLocation() {
+            return picture.bounds().getLocation();
+        }
+
+        @Override
+        public Dimension getSize() {
+            return new Dimension(700, 250);
+        }
+
+        @Override
+        public Color getInitialValue() {
+            drawStyle = DrawStyleManager.getInstance().getDrawStyle(picture);
+            Color color = null;
+            if (drawStyle != null) {
+                color = drawStyle.getColor(key);
+            }
+            return color;
+        }
+
+        @Override
+        public void applyNewValue() {
+            Color newColor = getColor();
+            if (newColor != null) {
+                drawStyle = new DrawStyle(drawStyle);
+                drawStyle.setColor(key, newColor);
+                DrawStyleManager.getInstance().setDrawStyle(picture, drawStyle);
+            }
+        }
+        
+        private final AbstractPicture picture;
+        private final Object key;
+        private DrawStyle drawStyle;
+        
+    }
+    
+
     protected Book book;
 
 
@@ -851,5 +916,6 @@ public class GraphEditor extends bka.swing.FrameApplication {
     private static final String SPLIT_DIVIDER_PROPERTY = "diagramSplitPane.dividerLocation";
     
     private static final int EDIT_MIN_WIDTH = 50;
+    private static final int EDIT_MIN_HEIGHT = 25;
 
 }

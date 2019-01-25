@@ -1163,7 +1163,7 @@ public class DiagramComponent extends JComponent {
         public void mouseDragged(MouseEvent evt) {
             if (dragInfo != null) {
                 dragInfo.endPoint = evt.getPoint();
-                if (! dragInfo.vertexInfos.isEmpty() /*&& dragInfo.containsHoveredPicture()*/) {
+                if (! dragInfo.vertexInfos.isEmpty()) {
                     dragVertex(evt.getPoint());
                 }
                 if (dragInfo.edgeInfo != null) {

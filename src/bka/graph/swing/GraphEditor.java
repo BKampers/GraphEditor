@@ -103,8 +103,18 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
 
     public final void pickColor(AbstractPicture picture, Object key) {
-        bka.swing.Popup.show(this, new ColorPopupModel(picture, key));
-        getSelectedDiagramComponent().clearHoverInfo();
+        DrawStyle drawStyle = DrawStyleManager.getInstance().getDrawStyle(picture);
+        if (drawStyle != null) {
+            Rectangle bounds = new Rectangle(picture.xEast(), picture.yNorth(), 700, 250);
+            Color oldColor = drawStyle.getColor(key);
+            bka.swing.Popup.show(this, ColorChooserPopupModel.create(bounds, oldColor, (newColor) -> {
+                if (! Objects.equals(oldColor, newColor)) {
+                    drawStyle.setColor(key, newColor);
+                    DrawStyleManager.getInstance().setDrawStyle(picture, drawStyle);
+                    getSelectedDiagramComponent().clearHoverInfo();
+              }
+            }));
+        }
     }
     
    
@@ -611,7 +621,14 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     
     private void renameDiagram() {
-        bka.swing.Popup.show(diagramTabbedPane, new TabLabelPopupModel(diagramTabbedPane.getSelectedIndex()));
+        int tabIndex = diagramTabbedPane.getSelectedIndex();
+        Rectangle bounds = diagramTabbedPane.getBoundsAt(tabIndex);
+        bounds.width = Math.max(EDIT_MIN_WIDTH, bounds.width);
+        bounds.height = Math.max(EDIT_MIN_HEIGHT, bounds.height);
+        bka.swing.Popup.show(diagramTabbedPane, TextFieldPopupModel.create(bounds, diagramTabbedPane.getTitleAt(tabIndex), (newTitle) -> {
+            getDiagramComponent(tabIndex).setTitle(newTitle);
+            updateTabTitle(tabIndex);
+        }));
     }
     
     
@@ -790,86 +807,6 @@ public class GraphEditor extends bka.swing.FrameApplication {
                 }
             }
         }
-        
-    }
-
-
-    private class TabLabelPopupModel extends TextFieldPopupModel {
-
-        TabLabelPopupModel(int tabIndex) {
-            this.tabIndex = tabIndex;
-            bounds = diagramTabbedPane.getBoundsAt(tabIndex);
-            bounds.width = Math.max(EDIT_MIN_WIDTH, bounds.width);
-            bounds.height = Math.max(EDIT_MIN_HEIGHT, bounds.height);
-        }
-        
-        @Override
-        public Point getLocation() {
-            return bounds.getLocation();
-        }
-
-        @Override
-        public Dimension getSize() {
-            return bounds.getSize();
-        }
-
-        @Override
-        public String getInitialValue() {
-            return diagramTabbedPane.getTitleAt(tabIndex);
-        }
-
-        @Override
-        public void applyNewValue() {
-            getDiagramComponent(tabIndex).setTitle(getText());
-            updateTabTitle(tabIndex);
-        }
-        
-        private final int tabIndex;
-        private final Rectangle bounds;
-        
-    }
-
-    
-    private class ColorPopupModel extends ColorChooserPopupModel {
-
-        ColorPopupModel(AbstractPicture picture, Object key) {
-            this.picture = picture;
-            this.key = key;
-        }
-        
-        @Override
-        public Point getLocation() {
-            return picture.bounds().getLocation();
-        }
-
-        @Override
-        public Dimension getSize() {
-            return new Dimension(700, 250);
-        }
-
-        @Override
-        public Color getInitialValue() {
-            drawStyle = DrawStyleManager.getInstance().getDrawStyle(picture);
-            Color color = null;
-            if (drawStyle != null) {
-                color = drawStyle.getColor(key);
-            }
-            return color;
-        }
-
-        @Override
-        public void applyNewValue() {
-            Color newColor = getColor();
-            if (newColor != null) {
-                drawStyle = new DrawStyle(drawStyle);
-                drawStyle.setColor(key, newColor);
-                DrawStyleManager.getInstance().setDrawStyle(picture, drawStyle);
-            }
-        }
-        
-        private final AbstractPicture picture;
-        private final Object key;
-        private DrawStyle drawStyle;
         
     }
     

@@ -2,12 +2,10 @@
 ** Copyright © Bart Kampers
 */
 
-
 package bka.graph.swing;
 
-
 import bka.awt.*;
-import bka.graph.Vertex;
+import bka.graph.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
@@ -90,7 +88,7 @@ class VertexTreePanel extends javax.swing.JPanel {
         }
     }
     
-    
+
     void vertexRemoved(VertexPicture vertexPicture) {
         DefaultMutableTreeNode vertexPictureNode = findNode(vertexPicture);
         if (vertexPictureNode != null) {

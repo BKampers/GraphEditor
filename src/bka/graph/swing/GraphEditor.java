@@ -32,6 +32,11 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
     
+    public interface TreePanelDelegate {
+        Collection<VertexPicture> getDependentVertexPictures(VertexPicture picture);
+    }
+    
+    
     public interface ContextDelegate {
         java.util.List<JMenuItem> getVertexMenuItems(VertexPicture picture);
         java.util.List<JMenuItem> getEdgeMenuItems(EdgePicture picture);
@@ -172,6 +177,15 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     void vertexPictureModified(VertexPicture picture) {
         vertexTreePanel.vertexModified(picture);
+        TreePanelDelegate delegate = getTreePanelDelegate();
+        if (delegate != null) {
+            Collection<VertexPicture> pictures = delegate.getDependentVertexPictures(picture);
+            if (pictures != null) {
+                for (VertexPicture vertexPicture : pictures) {
+                    vertexTreePanel.vertexModified(vertexPicture);
+                }
+            }
+        } 
         if (listener != null) {
             listener.vertexPictureModified(picture);
         }
@@ -317,6 +331,11 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
     
+    protected TreePanelDelegate getTreePanelDelegate() {
+        return null;
+    }
+    
+    
     protected OnLoadDelegate getOnLoadDelegate() {
         return null;
     }
@@ -334,6 +353,16 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     protected void clearHoverInfo() {
         getSelectedDiagramComponent().clearHoverInfo();
+    }
+    
+    
+    protected Collection<VertexPicture> getVertexPictures() {
+        Collection<VertexPicture> pictures = new HashSet<>();
+        int count = diagramTabbedPane.getTabCount();
+        for (int i = 0; i < count; ++i) {
+            pictures.addAll(getDiagramComponent(i).getVertexPictures());
+        }
+        return pictures;
     }
 
 

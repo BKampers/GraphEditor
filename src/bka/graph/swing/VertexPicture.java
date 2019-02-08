@@ -5,9 +5,7 @@
 package bka.graph.swing;
 
 import bka.graph.*;
-import bka.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.awt.font.*;
 import java.awt.geom.*;
 import java.awt.image.*;
@@ -203,12 +201,7 @@ public class VertexPicture extends AbstractPicture {
         return null;
     }
     
-    
-    protected VertexPopup getPopup() {
-        return null;
-    }
-    
-    
+
     @Override
     protected final int yNorth() {
         return location.y - size.height / 2;

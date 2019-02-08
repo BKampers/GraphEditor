@@ -7,7 +7,7 @@ package bka.graph.swing;
 import bka.awt.*;
 import bka.graph.*;
 import bka.graph.document.*;
-import bka.swing.*;
+import bka.swing.popup.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
@@ -309,6 +309,10 @@ public class DiagramComponent extends JComponent {
             setVertexLocation(destination, originalLocation);
             destination.setSize(originalSize);
             moveContainedPictures(destination, δx, δy);
+            for (EdgePicture edgePicture : allEdgePictures(destination)) {
+                edgePicture.correctEndPoint(destination);
+                edgePicture.cleanup();
+            }
         }
     }
 
@@ -419,7 +423,7 @@ public class DiagramComponent extends JComponent {
                 setSelected(vertexPicture);
             }
             else {
-                show(evt, vertexPicture);
+                showPopup(evt, vertexPicture);
             }
         }
         else {
@@ -433,16 +437,10 @@ public class DiagramComponent extends JComponent {
     }
     
     
-    public void show(MouseEvent event, VertexPicture picture) {
-        VertexPopup popup = picture.getPopup();
-        if (popup != null) {
-            DiagramComponent component = (DiagramComponent) event.getSource();
-            PopupTextField popupTextField = new PopupTextField(popup.initialText(), popup.bounds());
-            popupTextField.addListener((String text) -> {
-                popup.apply(text);
-                component.vertexPictureModified(picture);
-            });
-            popupTextField.show(component);
+    private void showPopup(MouseEvent event, VertexPicture picture) {
+        PopupModel popupModel = editor.getPopupModel(picture);
+        if (popupModel != null) {
+            PopupControl.show(getParent(), new VertexPicturePopupModel(popupModel, picture));
         }
     }
     
@@ -1089,7 +1087,7 @@ public class DiagramComponent extends JComponent {
         Location location;
     }
     
-    
+
     public void vertexPictureModified(VertexPicture vertexPicture) {
         repaint();
         editor.vertexPictureModified(vertexPicture);
@@ -1227,6 +1225,50 @@ public class DiagramComponent extends JComponent {
 
     };
 
+    
+    private class VertexPicturePopupModel implements PopupModel {
+        
+        VertexPicturePopupModel(PopupModel model, VertexPicture picture) {
+            this.model = model;
+            this.picture = picture;
+        }
+
+        @Override
+        public Component getComponent() {
+            return model.getComponent();
+        }
+        
+        @Override
+        public Point getLocation() {
+            return model.getLocation();
+        }
+        
+        @Override
+        public Dimension getSize() {
+            return model.getSize();
+        }
+        
+        @Override
+        public void bindListener(Runnable whenReady) {
+            model.bindListener(whenReady);
+        }
+        
+        @Override
+        public Object getInitialValue() {
+            return model.getInitialValue();
+        }
+        
+        @Override
+        public void applyNewValue() {
+            model.applyNewValue();
+            vertexPictureModified(picture);
+        }
+
+        private final PopupModel model;
+        private final VertexPicture picture;
+
+    }
+    
     
     private final GraphEditor editor;
     private final DiagramPage page;

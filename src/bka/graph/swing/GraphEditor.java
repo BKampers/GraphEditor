@@ -7,7 +7,7 @@ package bka.graph.swing;
 import bka.awt.*;
 import bka.graph.*;
 import bka.graph.document.*;
-import bka.swing.*;
+import bka.swing.popup.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -29,6 +29,11 @@ public class GraphEditor extends bka.swing.FrameApplication {
         void edgePictureModified(EdgePicture picture);
         void edgePictureRemoved(EdgePicture picture);
         void edgePictureClicked(EdgePicture picture, int count);
+    }
+    
+    
+    public interface EditorDelegate {
+        PopupModel getPopupModel(AbstractPicture picture);
     }
     
     
@@ -112,7 +117,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
         if (drawStyle != null) {
             Rectangle bounds = new Rectangle(picture.xEast(), picture.yNorth(), 700, 250);
             Color oldColor = drawStyle.getColor(key);
-            bka.swing.Popup.show(this, ColorChooserPopupModel.create(bounds, oldColor, (newColor) -> {
+            PopupControl.show(this, new ColorChooserPopupModel(bounds, oldColor, (newColor) -> {
                 if (! Objects.equals(oldColor, newColor)) {
                     drawStyle.setColor(key, newColor);
                     DrawStyleManager.getInstance().setDrawStyle(picture, drawStyle);
@@ -298,7 +303,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
 
     
-    protected void setHighlighted(Vertex vertex, DrawStyle drawStyle) {
+    final protected void setHighlighted(Vertex vertex, DrawStyle drawStyle) {
         int count = diagramTabbedPane.getTabCount();
         for (int i = 0; i < count; ++i) {
             boolean vertexHighlighted = getDiagramComponent(i).setHighlighted(vertex, drawStyle);
@@ -309,7 +314,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
 
 
-    protected VertexPicture getVertexPicture(Vertex vertex) {
+    final protected VertexPicture getVertexPicture(Vertex vertex) {
         int count = diagramTabbedPane.getTabCount();
         int selected = diagramTabbedPane.getSelectedIndex();
         for (int i = 0; i <  count; ++i) {
@@ -326,8 +331,23 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
     
+    final protected PopupModel getPopupModel(AbstractPicture picture) {
+        EditorDelegate editorDelegate = getEditorDelegate();
+        if (editorDelegate == null) {
+            return null;
+        }
+        return editorDelegate.getPopupModel(picture);
+        
+    }
+    
+    
     protected ContextDelegate getContextDelegate() {
         return new DefaultContextDelegate(this);
+    }
+    
+    
+    protected EditorDelegate getEditorDelegate() {
+        return null;
     }
     
     
@@ -654,8 +674,9 @@ public class GraphEditor extends bka.swing.FrameApplication {
         Rectangle bounds = diagramTabbedPane.getBoundsAt(tabIndex);
         bounds.width = Math.max(EDIT_MIN_WIDTH, bounds.width);
         bounds.height = Math.max(EDIT_MIN_HEIGHT, bounds.height);
-        bka.swing.Popup.show(diagramTabbedPane, TextFieldPopupModel.create(bounds, diagramTabbedPane.getTitleAt(tabIndex), (newTitle) -> {
-            getDiagramComponent(tabIndex).setTitle(newTitle);
+        DiagramComponent diagramComponent = getDiagramComponent(tabIndex);
+        PopupControl.show(diagramTabbedPane, new TextFieldPopupModel(bounds, diagramComponent.getTitle(), (newTitle) -> {
+            diagramComponent.setTitle(newTitle);
             updateTabTitle(tabIndex);
         }));
     }

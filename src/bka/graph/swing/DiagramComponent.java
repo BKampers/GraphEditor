@@ -417,28 +417,28 @@ public class DiagramComponent extends JComponent {
     }
     
     
-    private void vertexPictureClicked(VertexPicture vertexPicture, MouseEvent evt) {
-        if (evt.getClickCount() == 1) {
+    private void vertexPictureClicked(VertexPicture vertexPicture, MouseEvent event) {
+        if (event.getClickCount() == 1) {
             if (selectedPicture != vertexPicture) {
                 setSelected(vertexPicture);
             }
             else {
-                showPopup(evt, vertexPicture);
+                showPopup(vertexPicture, event);
             }
         }
         else {
             editPanel = vertexPicture.getEditPanel();
             if (editPanel != null) {
-                openDialog(evt, vertexDialogTitle(vertexPicture.getVertex()));
+                openDialog(event, vertexDialogTitle(vertexPicture.getVertex()));
                 editor.vertexPictureModified(vertexPicture);
             }                
         }
-        editor.vertexPictureClicked(vertexPicture, evt.getClickCount());
+        editor.vertexPictureClicked(vertexPicture, event.getClickCount());
     }
     
     
-    private void showPopup(MouseEvent event, VertexPicture picture) {
-        PopupModel popupModel = editor.getPopupModel(picture);
+    private void showPopup(VertexPicture picture, MouseEvent event) {
+        PopupModel popupModel = editor.getPopupModel(picture, event);
         if (popupModel != null) {
             PopupControl.show(getParent(), new VertexPicturePopupModel(popupModel, picture));
         }

@@ -128,7 +128,7 @@ public class VertexPicture extends AbstractPicture {
      * @return true if given picture is located inside this picture
      */
     public boolean contains(VertexPicture picture) {
-        Rectangle intersection = getRectangle().intersection(picture.getRectangle());
+        Rectangle intersection = getBounds().intersection(picture.getBounds());
         if (intersection.isEmpty()) {
             return false;
         }

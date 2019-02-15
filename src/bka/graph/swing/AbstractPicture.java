@@ -17,7 +17,6 @@ public abstract class AbstractPicture {
     public static final String FILL = "FILL";
     public static final String TEXT = "TEXT";
 
-
     public abstract boolean isLocatedAt(Point point);
     
     protected abstract void paintText(Graphics2D g2d);
@@ -58,6 +57,11 @@ public abstract class AbstractPicture {
     }
 
 
+    public Object getArea(Point point) {
+        return null;
+    }
+
+
     protected void clearShape() {
         shape = null;
     }
@@ -90,11 +94,11 @@ public abstract class AbstractPicture {
     }
 
 
-    protected Rectangle getRectangle() {
+    protected Rectangle getBounds() {
         return new Rectangle(xWest(), yNorth(), xEast() - xWest(), ySouth() - yNorth());
     }
-
-
+    
+    
     protected static int squareDistance(Point p, Point q) {
         int δx = p.x - q.x;
         int δy = p.y - q.y;

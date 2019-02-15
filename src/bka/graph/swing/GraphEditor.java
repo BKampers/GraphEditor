@@ -33,7 +33,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
     
     
     public interface EditorDelegate {
-        PopupModel getPopupModel(AbstractPicture picture);
+        PopupModel getPopupModel(AbstractPicture picture, MouseEvent event);
     }
     
     
@@ -331,12 +331,12 @@ public class GraphEditor extends bka.swing.FrameApplication {
     }
     
     
-    final protected PopupModel getPopupModel(AbstractPicture picture) {
+    final PopupModel getPopupModel(AbstractPicture picture, MouseEvent event) {
         EditorDelegate editorDelegate = getEditorDelegate();
         if (editorDelegate == null) {
             return null;
         }
-        return editorDelegate.getPopupModel(picture);
+        return editorDelegate.getPopupModel(picture, event);
         
     }
     

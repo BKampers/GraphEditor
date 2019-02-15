@@ -418,32 +418,30 @@ public class DiagramComponent extends JComponent {
     
     
     private void vertexPictureClicked(VertexPicture vertexPicture, MouseEvent event) {
-        if (event.getClickCount() == 1) {
-            if (selectedPicture != vertexPicture) {
-                setSelected(vertexPicture);
-            }
-            else {
-                showPopup(vertexPicture, event);
-            }
+        if (selectedPicture != vertexPicture) {
+            setSelected(vertexPicture);
         }
         else {
-            editPanel = vertexPicture.getEditPanel();
-            if (editPanel != null) {
-                openDialog(event, vertexDialogTitle(vertexPicture.getVertex()));
-                editor.vertexPictureModified(vertexPicture);
+            PopupModel popupModel = editor.getPopupModel(vertexPicture, event);
+            if (popupModel != null) {
+                PopupControl.show(getParent(), new VertexPicturePopupModel(popupModel, vertexPicture));
+            }
+            else if (event.getClickCount() == 2) {
+                showEditorDialog(vertexPicture, event);
             }                
         }
         editor.vertexPictureClicked(vertexPicture, event.getClickCount());
     }
-    
-    
-    private void showPopup(VertexPicture picture, MouseEvent event) {
-        PopupModel popupModel = editor.getPopupModel(picture, event);
-        if (popupModel != null) {
-            PopupControl.show(getParent(), new VertexPicturePopupModel(popupModel, picture));
+
+
+    private void showEditorDialog(VertexPicture vertexPicture, MouseEvent event) {
+        editPanel = vertexPicture.getEditPanel();
+        if (editPanel != null) {
+            openDialog(event, vertexDialogTitle(vertexPicture.getVertex()));
+            editor.vertexPictureModified(vertexPicture);
         }
     }
-    
+
     
     private void addNewVertexPicture(Class vertexPictureClass, Point point) {
         try {

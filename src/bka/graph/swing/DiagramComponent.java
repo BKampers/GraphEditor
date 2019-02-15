@@ -140,6 +140,11 @@ public class DiagramComponent extends JComponent {
                 g2d.setColor(attachmentPointColor);
                 g2d.fillOval(attachmentPoint.x - attachmentPointWidth / 2, attachmentPoint.y - attachmentPointHeight / 2, attachmentPointWidth, attachmentPointHeight);
             }
+            if (hoverInfo != null && hoverInfo.area != null) {
+                g2d.setColor(areaBoundsColor);
+                g2d.setStroke(AREA_BOUNDS_STROKE);
+                g2d.drawRoundRect(hoverInfo.area.x, hoverInfo.area.y, hoverInfo.area.width, hoverInfo.area.height, 3, 3);
+            }
             if (dragInfo != null && dragInfo.vertexInfos.isEmpty() && dragInfo.edgeInfo == null) {
                 Rectangle rectangle = dragInfo.getRectangle();
                 if (rectangle != null) {
@@ -472,6 +477,7 @@ public class DiagramComponent extends JComponent {
 
 
     private void startDrag(Point point) {
+        hoverInfo.area = null;
         dragInfo = new DragInfo();
         dragInfo.startPoint = point;
         if (hoverInfo != null && hoverInfo.location == Location.INTERIOR && selectedVertices.contains(hoverInfo.picture)) {
@@ -825,14 +831,17 @@ public class DiagramComponent extends JComponent {
             needRepaint = true;
         }
         if (picture != null) {
+            AbstractPicture.Area area = picture.getArea(point);
             if (hoverInfo == null) {
                 hoverInfo = new HoverInfo();
             }
             hoverInfo.picture = picture;
             hoverInfo.location = location;
+            needRepaint |= hoverInfo.setArea((area == null) ? null : area.getBounds());
             setToolTipText(picture.getToolTipText());
         }
-        else {
+        else if (hoverInfo != null) {
+            needRepaint |= hoverInfo.area != null;
             hoverInfo = null;
         }
         if (editor.selectedEdgePictureClass() == null) {
@@ -994,6 +1003,45 @@ public class DiagramComponent extends JComponent {
     }
 
 
+    public void vertexPictureModified(VertexPicture vertexPicture) {
+        repaint();
+        editor.vertexPictureModified(vertexPicture);
+    }
+    
+    
+    /**
+     * @param edgePicture
+     * @return index of last vertex picture from pictures that is origin or terminus of edgePicture
+     */
+    private int findInsertIndex(EdgePicture edgePicture) {
+        VertexPicture origin = edgePicture.getOriginPicture();
+        VertexPicture terminus = edgePicture.getTerminusPicture();
+        for (int index = pictures.size() - 1; index >= 0;  --index) {
+            AbstractPicture abstractPicture = pictures.get(index);
+            if (origin == abstractPicture || terminus == abstractPicture) {
+                return index;
+            }
+        }
+        throw new IllegalStateException("No vertex found for edge.");
+    }
+    
+
+    private class HoverInfo {
+        
+        boolean setArea(Rectangle rectangle) {
+            if (area == rectangle) {
+                return false;
+            }
+            area = rectangle;
+            return true;
+        }
+        
+        AbstractPicture picture;
+        Location location;
+        Rectangle area;
+    }
+
+
     private class DragInfo {
         
         Rectangle getRectangle() {
@@ -1080,35 +1128,50 @@ public class DiagramComponent extends JComponent {
     }
     
     
-    private class HoverInfo {
-        AbstractPicture picture;
-        Location location;
-    }
-    
-
-    public void vertexPictureModified(VertexPicture vertexPicture) {
-        repaint();
-        editor.vertexPictureModified(vertexPicture);
-    }
-    
-    
-    /**
-     * @param edgePicture
-     * @return index of last vertex picture from pictures that is origin or terminus of edgePicture
-     */
-    private int findInsertIndex(EdgePicture edgePicture) {
-        VertexPicture origin = edgePicture.getOriginPicture();
-        VertexPicture terminus = edgePicture.getTerminusPicture();
-        for (int index = pictures.size() - 1; index >= 0;  --index) {
-            AbstractPicture abstractPicture = pictures.get(index);
-            if (origin == abstractPicture || terminus == abstractPicture) {
-                return index;
-            }
+    private class VertexPicturePopupModel implements PopupModel {
+        
+        VertexPicturePopupModel(PopupModel model, VertexPicture picture) {
+            this.model = model;
+            this.picture = picture;
         }
-        throw new IllegalStateException("No vertex found for edge.");
+
+        @Override
+        public Component getComponent() {
+            return model.getComponent();
+        }
+        
+        @Override
+        public Point getLocation() {
+            return model.getLocation();
+        }
+        
+        @Override
+        public Dimension getSize() {
+            return model.getSize();
+        }
+        
+        @Override
+        public void bindListener(Runnable whenReady) {
+            model.bindListener(whenReady);
+        }
+        
+        @Override
+        public Object getInitialValue() {
+            return model.getInitialValue();
+        }
+        
+        @Override
+        public void applyNewValue() {
+            model.applyNewValue();
+            vertexPictureModified(picture);
+        }
+
+        private final PopupModel model;
+        private final VertexPicture picture;
+
     }
-
-
+    
+    
     private final MouseAdapter MOUSE_ADAPTER = new MouseAdapter() {
 
         @Override
@@ -1224,50 +1287,6 @@ public class DiagramComponent extends JComponent {
     };
 
     
-    private class VertexPicturePopupModel implements PopupModel {
-        
-        VertexPicturePopupModel(PopupModel model, VertexPicture picture) {
-            this.model = model;
-            this.picture = picture;
-        }
-
-        @Override
-        public Component getComponent() {
-            return model.getComponent();
-        }
-        
-        @Override
-        public Point getLocation() {
-            return model.getLocation();
-        }
-        
-        @Override
-        public Dimension getSize() {
-            return model.getSize();
-        }
-        
-        @Override
-        public void bindListener(Runnable whenReady) {
-            model.bindListener(whenReady);
-        }
-        
-        @Override
-        public Object getInitialValue() {
-            return model.getInitialValue();
-        }
-        
-        @Override
-        public void applyNewValue() {
-            model.applyNewValue();
-            vertexPictureModified(picture);
-        }
-
-        private final PopupModel model;
-        private final VertexPicture picture;
-
-    }
-    
-    
     private final GraphEditor editor;
     private final DiagramPage page;
     private final ArrayList<AbstractPicture> pictures = new ArrayList<>();
@@ -1289,10 +1308,12 @@ public class DiagramComponent extends JComponent {
 
     private final Collection<VertexPicture> selectedVertices = new ArrayList<>();
     private final Color attachmentPointColor = Color.RED;
+    private final Color areaBoundsColor = new Color(255, 0, 0, 127);
     private final int attachmentPointWidth = 4;
     private final int attachmentPointHeight = 4;
 
     private static final Color SELECTION_COLOR = new Color(0, 0, 255, 64);
     private static final BasicStroke SELECTION_STROKE = new BasicStroke(5.0f);
+    private static final BasicStroke AREA_BOUNDS_STROKE = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1.0f, new float[] { 1.1f, 1.1f }, 0.0f);
 
 }

@@ -8,6 +8,7 @@ package bka.graph.swing;
 import bka.awt.*;
 import java.awt.*;
 import java.awt.font.*;
+import java.awt.geom.*;
 import java.util.*;
 
 
@@ -79,10 +80,15 @@ public abstract class AbstractPicture {
     }
 
 
-    public Area getArea(Point point) {
+    public Object getAreaKey(Point point) {
         return null;
     }
 
+
+    final Rectangle2D getTextArea(Object key) {
+        return Objects.requireNonNull(textAreas.get(key));
+    }
+    
 
     protected void clearShape() {
         shape = null;
@@ -132,5 +138,7 @@ public abstract class AbstractPicture {
     protected static final Map<TextAttribute, Object> DEFAULT_FONT = Collections.EMPTY_MAP;
     
     private  Shape shape;
+    protected final Map<Object, Rectangle2D> textAreas = new HashMap<>();
+    
 
 }

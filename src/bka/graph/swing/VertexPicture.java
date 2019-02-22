@@ -85,6 +85,16 @@ public class VertexPicture extends AbstractPicture {
     }
 
 
+    protected Element createElement(String text) {
+        return new Element(null, text);
+    }
+
+
+    protected Element createElement(Object key, String text) {
+        return new Element(key, text);
+    }
+
+
     private Location internalLocation(Point point) {
         Location internal = Location.INTERIOR;
         if (point.y <= yNorth() + LOCATION_NEAR_DISTANCE) {
@@ -201,7 +211,7 @@ public class VertexPicture extends AbstractPicture {
         return null;
     }
     
-
+    
     @Override
     protected final int yNorth() {
         return location.y - size.height / 2;
@@ -305,18 +315,18 @@ public class VertexPicture extends AbstractPicture {
 
 
     protected void paintText(Graphics2D g2d, String text, Object fontKey) {
-        paintText(g2d, text, new Point2D.Float(location.x, location.y), getFont(fontKey));
+        paintText(g2d, text, new Point2D.Double(location.x, location.y), getFont(fontKey));
 
     }
 
 
-    protected void paintText(Graphics2D g2d, String text, Point2D.Float position) {
+    protected void paintText(Graphics2D g2d, String text, Point2D position) {
         paintText(g2d, text, position, TEXT);
 
     }
 
 
-    protected void paintText(Graphics2D g2d, String text, Point2D.Float position, Object fontKey) {
+    protected void paintText(Graphics2D g2d, String text, Point2D position, Object fontKey) {
         paintText(g2d, text, position, getFont(fontKey));
 
     }
@@ -335,24 +345,87 @@ public class VertexPicture extends AbstractPicture {
 
 
     protected void paintText(Graphics2D g2d, String text, int row, Map<? extends Attribute, ?> attributes) {
-        if (text != null && ! text.isEmpty()) {
-            float x = location.x;
-            float y = yNorth() + g2d.getFontMetrics().getHeight() * row;
-            paintText(g2d, text, new Point2D.Float(x, y), attributes);
+        paintText(g2d, text, center(g2d, row), getFont(TEXT));
+    }
+
+    
+    protected void paintText(Graphics2D g2d, String text, Point2D position, Map<? extends Attribute, ?> attributes) {
+        TextLayout layout = getLayout(g2d, text);
+        if (layout != null) {
+            Rectangle2D bounds = layout.getBounds();
+            double x = position.getX() - bounds.getWidth() / 2.0;
+            double y = position.getY() - bounds.getCenterY() / 2.0;
+            layout.draw(g2d, (float) x, (float) y);
         }
     }
 
 
-    protected void paintText(Graphics2D g2d, String text, Point2D.Float position, Map<? extends Attribute, ?> attributes) {
-        if (text != null && ! text.isEmpty()) {
-            AttributedString string = new AttributedString(text);
-            string.addAttributes(attributes, 0, text.length());
-            TextLayout layout = new TextLayout(string.getIterator(), g2d.getFontRenderContext());
-            Rectangle2D bounds = layout.getBounds();
-            float x = position.x - (float) bounds.getWidth() / 2.0f;
-            float y = position.y - (float) bounds.getCenterY() / 2.0f;
-            layout.draw(g2d, x, y);
+    protected void paintText(Graphics2D g2d, Object key, String text, int row) {
+        TextLayout layout = getLayout(g2d, text);
+        Rectangle2D bounds = (layout != null) ? layout.getBounds() : emptyBounds(g2d);
+        Point2D position = center(g2d, row);
+        double x = position.getX() - bounds.getWidth() / 2.0;
+        if (layout != null) {
+            layout.draw(g2d, (float) x, (float) position.getY() - layout.getBaseline());
         }
+        putTextArea(key, x, position.getY(), bounds);
+    }
+
+    
+    protected void paintText(Graphics2D g2d, Element[] line, Map<? extends Attribute, ?> attributes) {
+        paintText(g2d, line, center(g2d, 1), attributes);
+    }
+    
+    
+    protected void paintText(Graphics2D g2d, Element[] line, int row, Map<? extends Attribute, ?> attributes) {
+        paintText(g2d, line, center(g2d, row), attributes);
+    }
+    
+    
+    protected void paintText(Graphics2D g2d, Element[] line, Point2D position, Map<? extends Attribute, ?> attributes) {
+        Map<Object, TextLayout> layoutMap = new HashMap<>();
+        double width = 0.0;
+        for (Element element : line) {
+            if (element.text != null && ! element.text.isEmpty()) {
+                TextLayout layout = getLayout(g2d, element.text);
+                layoutMap.put(element, layout);
+                width += layout.getBounds().getWidth();
+            }
+        }
+        double x = position.getX() - width / 2.0;
+        for (Element element : line) {
+            TextLayout layout = layoutMap.get(element);
+            Rectangle2D bounds;
+            if (layout != null) {
+                bounds = layout.getBounds();
+                double y = position.getY() - layout.getBaseline();
+                layout.draw(g2d, (float) x, (float) y);
+            }
+            else {
+                bounds = emptyBounds(g2d);
+            }
+            if (element.key != null) {
+                putTextArea(element.key, x, position.getY(), bounds);
+            }
+            if (element.text != null && ! element.text.isEmpty()) {
+                x += bounds.getWidth();
+            }
+        }
+    }
+    
+    
+    private TextLayout getLayout(Graphics2D g2d, String text) {
+        if (text == null || text.isEmpty()) {
+            return null;
+        }
+        AttributedString string = new AttributedString(text);
+        string.addAttributes(getFont(TEXT), 0, text.length());
+        return new TextLayout(string.getIterator(), g2d.getFontRenderContext());
+    }
+    
+    
+   private static Rectangle2D emptyBounds(Graphics2D g2d) {
+        return new Rectangle2D.Double(0, 0, 1, g2d.getFontMetrics().getHeight());
     }
     
     
@@ -376,15 +449,35 @@ public class VertexPicture extends AbstractPicture {
             xWest() - LOCATION_NEAR_DISTANCE <= point.x && point.x <= xEast() + LOCATION_NEAR_DISTANCE &&
             yNorth() - LOCATION_NEAR_DISTANCE <= point.y && point.y <= ySouth() + LOCATION_NEAR_DISTANCE;
     }
-
-
-    protected Point[] attachmentPoints;
     
-    protected Point location;
-    protected Vertex vertex;
-     
-    protected Dimension size;
+    
+    private Point2D center(Graphics2D g2d, int row) {
+        return new Point2D.Double(location.x, yNorth() + g2d.getFontMetrics().getHeight() * row);
+    }
 
+
+    private void putTextArea(Object key, double x,double y, Rectangle2D bounds) {
+        textAreas.put(key, new Rectangle2D.Double(x, y - bounds.getHeight(), bounds.getWidth(), bounds.getHeight()));
+    }
+    
+    
+    protected class Element {
+        
+        private Element(Object key, String text) {
+            this.key = key;
+            this.text = text;
+        }
+        
+        private final Object key;
+        private final String text;
+    }
+    
+    
+    protected Vertex vertex;
+
+    protected Point location;     
+    protected Dimension size;
+    protected Point[] attachmentPoints;
     private Paint fillPaint;
     
     private static final int LOCATION_NEAR_DISTANCE = 3;

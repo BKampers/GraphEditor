@@ -477,7 +477,9 @@ public class DiagramComponent extends JComponent {
 
 
     private void startDrag(Point point) {
-        hoverInfo.area = null;
+        if (hoverInfo != null) {
+            hoverInfo.area = null;
+        }
         dragInfo = new DragInfo();
         dragInfo.startPoint = point;
         if (hoverInfo != null && hoverInfo.location == Location.INTERIOR && selectedVertices.contains(hoverInfo.picture)) {
@@ -831,13 +833,13 @@ public class DiagramComponent extends JComponent {
             needRepaint = true;
         }
         if (picture != null) {
-            AbstractPicture.Area area = picture.getArea(point);
             if (hoverInfo == null) {
                 hoverInfo = new HoverInfo();
             }
             hoverInfo.picture = picture;
             hoverInfo.location = location;
-            needRepaint |= hoverInfo.setArea((area == null) ? null : area.getBounds());
+            Object areaKey = picture.getAreaKey(point);
+            needRepaint |= hoverInfo.setArea((areaKey == null) ? null : picture.getTextArea(areaKey).getBounds());
             setToolTipText(picture.getToolTipText());
         }
         else if (hoverInfo != null) {
@@ -1308,12 +1310,12 @@ public class DiagramComponent extends JComponent {
 
     private final Collection<VertexPicture> selectedVertices = new ArrayList<>();
     private final Color attachmentPointColor = Color.RED;
-    private final Color areaBoundsColor = new Color(255, 0, 0, 127);
+    private final Color areaBoundsColor = new Color(255, 0, 0, 192);
     private final int attachmentPointWidth = 4;
     private final int attachmentPointHeight = 4;
 
     private static final Color SELECTION_COLOR = new Color(0, 0, 255, 64);
     private static final BasicStroke SELECTION_STROKE = new BasicStroke(5.0f);
-    private static final BasicStroke AREA_BOUNDS_STROKE = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1.0f, new float[] { 1.1f, 1.1f }, 0.0f);
+    private static final BasicStroke AREA_BOUNDS_STROKE = new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1.0f, new float[] { 1.1f, 1.1f }, 0.0f);
 
 }

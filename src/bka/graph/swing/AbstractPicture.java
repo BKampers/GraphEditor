@@ -15,9 +15,7 @@ import java.util.*;
 public abstract class AbstractPicture {
 
 
-    public static final String DRAW = "DRAW";
-    public static final String FILL = "FILL";
-    public static final String TEXT = "TEXT";
+    public enum DrawStyleKey { DRAW, FILL, TEXT };
 
     public abstract boolean isLocatedAt(Point point);
     
@@ -47,8 +45,8 @@ public abstract class AbstractPicture {
     }
 
 
-    public String[] getCustomizablePaints() {
-        return new String[] { };
+    public Object[] getCustomizablePaints() {
+        return null;
     }
 
 

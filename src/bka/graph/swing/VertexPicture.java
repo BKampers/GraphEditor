@@ -249,10 +249,10 @@ public class VertexPicture extends AbstractPicture {
             g2d.setPaint(paint);
             g2d.fill(getShape());
         }
-        Color drawColor = getColor(DRAW);
+        Color drawColor = getColor(AbstractPicture.DrawStyleKey.DRAW);
         if (drawColor != null) {
             g2d.setPaint(drawColor);
-            g2d.setStroke(getStroke(DRAW));
+            g2d.setStroke(getStroke(AbstractPicture.DrawStyleKey.DRAW));
             g2d.draw(getShape());
         }
     }
@@ -278,9 +278,9 @@ public class VertexPicture extends AbstractPicture {
 
     protected Paint getFillPaint() {
         if (fillPaint == null) {
-            fillPaint = getDrawStyle().createGradientPaint(FILL, new Rectangle2D.Float(xWest(), yNorth(), size.width, size.height));
+            fillPaint = getDrawStyle().createGradientPaint(AbstractPicture.DrawStyleKey.FILL, new Rectangle2D.Float(xWest(), yNorth(), size.width, size.height));
             if (fillPaint == null) {
-                fillPaint = getColor(FILL);
+                fillPaint = getColor(AbstractPicture.DrawStyleKey.FILL);
             }
         }
         return fillPaint;
@@ -309,7 +309,7 @@ public class VertexPicture extends AbstractPicture {
     
     
     protected void paintText(Graphics2D g2d, String text) {
-        paintText(g2d, text, TEXT);
+        paintText(g2d, text, AbstractPicture.DrawStyleKey.TEXT);
 
     }
 
@@ -321,7 +321,7 @@ public class VertexPicture extends AbstractPicture {
 
 
     protected void paintText(Graphics2D g2d, String text, Point2D position) {
-        paintText(g2d, text, position, TEXT);
+        paintText(g2d, text, position, AbstractPicture.DrawStyleKey.TEXT);
 
     }
 
@@ -333,7 +333,7 @@ public class VertexPicture extends AbstractPicture {
 
 
     protected void paintText(Graphics2D g2d, String text, int row) {
-        paintText(g2d, text, row, TEXT);
+        paintText(g2d, text, row, AbstractPicture.DrawStyleKey.TEXT);
 
     }
 
@@ -345,12 +345,12 @@ public class VertexPicture extends AbstractPicture {
 
 
     protected void paintText(Graphics2D g2d, String text, int row, Map<? extends Attribute, ?> attributes) {
-        paintText(g2d, text, center(g2d, row), getFont(TEXT));
+        paintText(g2d, text, center(g2d, row), attributes);
     }
 
     
     protected void paintText(Graphics2D g2d, String text, Point2D position, Map<? extends Attribute, ?> attributes) {
-        TextLayout layout = getLayout(g2d, text);
+        TextLayout layout = getLayout(g2d, text, attributes);
         if (layout != null) {
             Rectangle2D bounds = layout.getBounds();
             double x = position.getX() - bounds.getWidth() / 2.0;
@@ -415,11 +415,16 @@ public class VertexPicture extends AbstractPicture {
     
     
     private TextLayout getLayout(Graphics2D g2d, String text) {
+        return getLayout(g2d, text, getFont(AbstractPicture.DrawStyleKey.TEXT));
+    }
+    
+    
+    private TextLayout getLayout(Graphics2D g2d, String text, Map<? extends Attribute, ?> attributes) {
         if (text == null || text.isEmpty()) {
             return null;
         }
         AttributedString string = new AttributedString(text);
-        string.addAttributes(getFont(TEXT), 0, text.length());
+        string.addAttributes(attributes, 0, text.length());
         return new TextLayout(string.getIterator(), g2d.getFontRenderContext());
     }
     

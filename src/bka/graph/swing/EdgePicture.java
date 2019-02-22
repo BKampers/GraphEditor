@@ -13,7 +13,7 @@ import java.util.logging.*;
 
 public class EdgePicture extends AbstractPicture {
 
-    public static final String ARROW_HEAD = "ARROW_HEAD";
+    public enum DrawStyleKey { ARROW_HEAD };
 
 
     public EdgePicture() {
@@ -93,8 +93,8 @@ public class EdgePicture extends AbstractPicture {
    
     
     @Override
-    public String[] getCustomizablePaints() {
-        return new String[] { AbstractPicture.DRAW };
+    public Object[] getCustomizablePaints() {
+        return new Object[] { AbstractPicture.DrawStyleKey.DRAW };
     }
         
 
@@ -344,10 +344,10 @@ public class EdgePicture extends AbstractPicture {
 
     @Override
     protected void paintShape(Graphics2D g2d) {
-        Paint drawPaint = getColor(DRAW);
+        Paint drawPaint = getColor(AbstractPicture.DrawStyleKey.DRAW);
         if (drawPaint != null) {
             g2d.setPaint(drawPaint);
-            g2d.setStroke(getStroke(DRAW));
+            g2d.setStroke(getStroke(AbstractPicture.DrawStyleKey.DRAW));
             g2d.draw(getShape());
         }
         if (edge == null || edge.isDirected()) {
@@ -355,7 +355,7 @@ public class EdgePicture extends AbstractPicture {
             double angle = angle(index);
             Point location = arrowheadLocation();
             if (location != null) {
-                g2d.setStroke(getStroke(ARROW_HEAD));
+                g2d.setStroke(getStroke(DrawStyleKey.ARROW_HEAD));
                 g2d.translate(location.x, location.y);
                 g2d.rotate(angle);
                 paintArrowhead(g2d);

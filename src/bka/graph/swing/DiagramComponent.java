@@ -18,8 +18,7 @@ import javax.swing.*;
 public class DiagramComponent extends JComponent {
     
     
-    public static final Object HIGHLIGHT_BORDER = "BORDER";
-    public static final Object HIGHLIGHT_TEXT = "TEXT";
+    public enum DrawStyleKey { HIGHLIGHT_BORDER, HIGHLIGHT_TEXT };
     
     
     DiagramComponent(GraphEditor editor, DiagramPage page) {
@@ -392,15 +391,15 @@ public class DiagramComponent extends JComponent {
 
     private void paintHighlight(Graphics2D g2d, AbstractPicture picture, Collection<DrawStyle> drawStyles) {
         for (DrawStyle style : drawStyles) {
-            Color color = style.getColor(HIGHLIGHT_BORDER);
-            Stroke stroke = style.getStroke(HIGHLIGHT_BORDER);
+            Color color = style.getColor(DrawStyleKey.HIGHLIGHT_BORDER);
+            Stroke stroke = style.getStroke(DrawStyleKey.HIGHLIGHT_BORDER);
             if (color != null && stroke != null) {
                 g2d.setPaint(color);
                 g2d.setStroke(stroke);
                 g2d.draw(picture.getShape());
             }
-            color = style.getColor(HIGHLIGHT_TEXT);
-            String text = style.getText(HIGHLIGHT_TEXT);
+            color = style.getColor(DrawStyleKey.HIGHLIGHT_TEXT);
+            String text = style.getText(DrawStyleKey.HIGHLIGHT_TEXT);
             if (text != null && color != null) {
                 g2d.setPaint(color);
                 g2d.drawString(text, picture.xWest(), picture.ySouth());

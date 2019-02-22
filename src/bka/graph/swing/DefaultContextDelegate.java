@@ -22,10 +22,13 @@ public class DefaultContextDelegate<E extends GraphEditor> implements GraphEdito
     @Override
     public java.util.List<JMenuItem> getEdgeMenuItems(EdgePicture picture) {
         ArrayList<JMenuItem> items = new ArrayList<>();
-        for (String paintKey : picture.getCustomizablePaints()) {
-            items.add(createItem("Color: " + paintKey, (ActionEvent evt) -> {
-                editor.pickColor(picture, paintKey);
-            }));
+        Object[] customizablePaints = picture.getCustomizablePaints();
+        if (customizablePaints != null) {
+            for (Object paintKey : customizablePaints) {
+                items.add(createItem("Color: " + paintKey, (ActionEvent evt) -> {
+                    editor.pickColor(picture, paintKey);
+                }));
+            }
         }
         return items;
     }

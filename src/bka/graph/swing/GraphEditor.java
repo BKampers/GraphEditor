@@ -100,10 +100,10 @@ public class GraphEditor extends bka.swing.FrameApplication {
     public static void main(final String[] arguments) {
         EventQueue.invokeLater(() -> {
             DrawStyle drawStyle = new DrawStyle();
-            drawStyle.setColor(AbstractPicture.FILL, Color.BLACK);
-            drawStyle.setColor(AbstractPicture.DRAW, Color.BLACK);
-            drawStyle.setStroke(AbstractPicture.DRAW, new BasicStroke());
-            drawStyle.setStroke(EdgePicture.ARROW_HEAD, new BasicStroke());
+            drawStyle.setColor(AbstractPicture.DrawStyleKey.FILL, Color.BLACK);
+            drawStyle.setColor(AbstractPicture.DrawStyleKey.DRAW, Color.BLACK);
+            drawStyle.setStroke(AbstractPicture.DrawStyleKey.DRAW, new BasicStroke());
+            drawStyle.setStroke(EdgePicture.DrawStyleKey.ARROW_HEAD, new BasicStroke());
             DrawStyleManager.getInstance().setDrawStyle(AbstractPicture.class, drawStyle);
             GraphEditor frame = new GraphEditor();
 //                frame.initialize(arguments);

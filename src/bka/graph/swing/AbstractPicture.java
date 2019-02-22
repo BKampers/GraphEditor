@@ -14,28 +14,7 @@ import java.util.*;
 
 public abstract class AbstractPicture {
 
-    
-    public class Area {
-        
-        public Area(Object key, Rectangle bounds) {
-            this.key = key;
-            this.bounds = bounds;
-        }
-        
-        public final Object getKey() {
-            return key;
-        }
-        
-        public final Rectangle getBounds() {
-            return bounds;
-        }
-        
-        private final Object key;
-        private final Rectangle bounds;
-        
-    }
-    
-    
+
     public static final String DRAW = "DRAW";
     public static final String FILL = "FILL";
     public static final String TEXT = "TEXT";

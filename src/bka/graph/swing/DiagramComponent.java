@@ -741,15 +741,18 @@ public class DiagramComponent extends JComponent {
     }
 
     
-    private void setAttachmentPoint(AbstractPicture picture, Point point) {
-        if (picture instanceof VertexPicture && editor.selectedEdgePictureClass() != null) {
-            attachmentPoint = ((VertexPicture) picture).nearestAttachmentPoint(point);
-            repaint();
+    private boolean setAttachmentPoint(AbstractPicture picture, Point point) {
+        if (editor.selectedEdgePictureClass() != null) {
+            if (picture instanceof VertexPicture) {
+                attachmentPoint = ((VertexPicture) picture).nearestAttachmentPoint(point);
+                return true;
+            }
         }
         else if (attachmentPoint != null) {
             attachmentPoint = null;
-            repaint();
+            return true;
         }
+        return false;
     }
     
     
@@ -849,8 +852,7 @@ public class DiagramComponent extends JComponent {
             setDiagramCursor(picture, point);
         }
         else {
-            setAttachmentPoint(picture, point);
-            needRepaint = true;
+            needRepaint |= setAttachmentPoint(picture, point);
         }
         if (needRepaint) {
             repaint();

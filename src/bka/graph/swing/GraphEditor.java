@@ -119,8 +119,9 @@ public class GraphEditor extends bka.swing.FrameApplication {
             Color oldColor = drawStyle.getColor(key);
             PopupControl.show(this, new ColorChooserPopupModel(bounds, oldColor, (newColor) -> {
                 if (! Objects.equals(oldColor, newColor)) {
-                    drawStyle.setColor(key, newColor);
-                    DrawStyleManager.getInstance().setDrawStyle(picture, drawStyle);
+                    DrawStyle newDrawStyle = new DrawStyle(drawStyle);
+                    newDrawStyle.setColor(key, newColor);
+                    DrawStyleManager.getInstance().setDrawStyle(picture, newDrawStyle);
                     getSelectedDiagramComponent().clearHoverInfo();
               }
             }));

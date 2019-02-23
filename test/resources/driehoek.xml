@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<java version="1.8.0_45" class="java.beans.XMLDecoder">
+<java version="1.8.0_152" class="java.beans.XMLDecoder">
  <object class="java.util.ArrayList">
   <void method="add">
    <object class="bka.graph.document.DiagramPage">
@@ -26,10 +26,10 @@
         <void property="edge">
          <object class="bka.graph.Edge">
           <void property="origin">
-           <object class="bka.graph.NamedVertex" id="Vertex0"/>
+           <object class="bka.graph.NamedVertex" id="NamedVertex0"/>
           </void>
           <void property="terminus">
-           <object class="bka.graph.NamedVertex" id="Vertex1"/>
+           <object class="bka.graph.NamedVertex" id="NamedVertex1"/>
           </void>
          </object>
         </void>
@@ -54,7 +54,7 @@
            </object>
           </void>
           <void property="vertex">
-           <object idref="Vertex0"/>
+           <object idref="NamedVertex0"/>
           </void>
          </object>
         </void>
@@ -95,7 +95,7 @@
            </void>
           </void>
           <void property="vertex">
-           <object idref="Vertex1"/>
+           <object idref="NamedVertex1"/>
           </void>
          </object>
         </void>
@@ -122,10 +122,10 @@
         <void property="edge">
          <object class="bka.graph.Edge">
           <void property="origin">
-           <object class="bka.graph.NamedVertex" id="Vertex2"/>
+           <object class="bka.graph.NamedVertex" id="NamedVertex2"/>
           </void>
           <void property="terminus">
-           <object idref="Vertex1"/>
+           <object idref="NamedVertex1"/>
           </void>
          </object>
         </void>
@@ -150,7 +150,7 @@
            </object>
           </void>
           <void property="vertex">
-           <object idref="Vertex2"/>
+           <object idref="NamedVertex2"/>
           </void>
          </object>
         </void>
@@ -180,10 +180,10 @@
         <void property="edge">
          <object class="bka.graph.Edge">
           <void property="origin">
-           <object idref="Vertex2"/>
+           <object idref="NamedVertex2"/>
           </void>
           <void property="terminus">
-           <object idref="Vertex0"/>
+           <object idref="NamedVertex0"/>
           </void>
          </object>
         </void>
@@ -216,37 +216,24 @@
  <int>0</int>
  <object class="java.util.HashMap">
   <void method="put">
-   <object idref="EdgePicture1"/>
+   <object idref="EdgePicture0"/>
    <object class="bka.awt.DrawStyle" id="DrawStyle0">
     <void id="HashMap0" property="colors">
      <void method="put">
-      <string>DRAW</string>
+      <object class="java.lang.Enum" id="AbstractPicture$DrawStyleKey0" method="valueOf">
+       <class>bka.graph.swing.AbstractPicture$DrawStyleKey</class>
+       <string>DRAW</string>
+      </object>
       <object class="java.awt.Color">
+       <int>153</int>
+       <int>0</int>
        <int>204</int>
-       <int>0</int>
-       <int>0</int>
        <int>255</int>
       </object>
      </void>
     </void>
     <void property="colors">
      <object idref="HashMap0"/>
-    </void>
-    <void id="HashMap1" property="strokes">
-     <void method="put">
-      <string>DRAW</string>
-      <object class="java.awt.BasicStroke" id="BasicStroke0">
-       <float>1.0</float>
-       <int>2</int>
-       <int>0</int>
-       <float>10.0</float>
-       <null/>
-       <float>0.0</float>
-      </object>
-     </void>
-    </void>
-    <void property="strokes">
-     <object idref="HashMap1"/>
     </void>
    </object>
   </void>
@@ -271,10 +258,10 @@
     <void property="edge">
      <object class="bka.graph.Edge">
       <void property="origin">
-       <object idref="Vertex1"/>
+       <object idref="NamedVertex1"/>
       </void>
       <void property="terminus">
-       <object idref="Vertex2"/>
+       <object idref="NamedVertex2"/>
       </void>
      </object>
     </void>
@@ -288,13 +275,32 @@
    <object class="bka.awt.DrawStyle"/>
   </void>
   <void method="put">
-   <object idref="EdgePicture2"/>
+   <object idref="EdgePicture1"/>
    <object class="bka.awt.DrawStyle" id="DrawStyle1">
+    <void id="HashMap1" property="colors">
+     <void method="put">
+      <object idref="AbstractPicture$DrawStyleKey0"/>
+      <object class="java.awt.Color">
+       <int>255</int>
+       <int>0</int>
+       <int>51</int>
+       <int>255</int>
+      </object>
+     </void>
+    </void>
+    <void property="colors">
+     <object idref="HashMap1"/>
+    </void>
+   </object>
+  </void>
+  <void method="put">
+   <object idref="EdgePicture2"/>
+   <object class="bka.awt.DrawStyle" id="DrawStyle2">
     <void id="HashMap2" property="colors">
      <void method="put">
-      <string>DRAW</string>
+      <object idref="AbstractPicture$DrawStyleKey0"/>
       <object class="java.awt.Color">
-       <int>153</int>
+       <int>0</int>
        <int>204</int>
        <int>0</int>
        <int>255</int>
@@ -303,70 +309,6 @@
     </void>
     <void property="colors">
      <object idref="HashMap2"/>
-    </void>
-    <void id="HashMap3" property="strokes">
-     <void method="put">
-      <string>DRAW</string>
-      <object idref="BasicStroke0"/>
-     </void>
-    </void>
-    <void property="strokes">
-     <object idref="HashMap3"/>
-    </void>
-   </object>
-  </void>
-  <void method="put">
-   <object idref="EdgePicture0"/>
-   <object class="bka.awt.DrawStyle" id="DrawStyle2">
-    <void id="HashMap4" property="colors">
-     <void method="put">
-      <string>DRAW</string>
-      <object class="java.awt.Color">
-       <int>102</int>
-       <int>102</int>
-       <int>255</int>
-       <int>255</int>
-      </object>
-     </void>
-     <void method="put">
-      <string>FILL</string>
-      <object class="java.awt.Color">
-       <int>0</int>
-       <int>0</int>
-       <int>0</int>
-       <int>255</int>
-      </object>
-     </void>
-    </void>
-    <void property="colors">
-     <object idref="HashMap4"/>
-    </void>
-    <void id="HashMap5" property="strokes">
-     <void method="put">
-      <string>DRAW</string>
-      <object class="java.awt.BasicStroke">
-       <float>1.0</float>
-       <int>2</int>
-       <int>0</int>
-       <float>10.0</float>
-       <null/>
-       <float>0.0</float>
-      </object>
-     </void>
-     <void method="put">
-      <string>ARROW_HEAD</string>
-      <object class="java.awt.BasicStroke">
-       <float>1.0</float>
-       <int>2</int>
-       <int>0</int>
-       <float>10.0</float>
-       <null/>
-       <float>0.0</float>
-      </object>
-     </void>
-    </void>
-    <void property="strokes">
-     <object idref="HashMap5"/>
     </void>
    </object>
   </void>
@@ -391,10 +333,10 @@
     <void property="edge">
      <object class="bka.graph.Edge">
       <void property="origin">
-       <object idref="Vertex2"/>
+       <object idref="NamedVertex2"/>
       </void>
       <void property="terminus">
-       <object idref="Vertex0"/>
+       <object idref="NamedVertex0"/>
       </void>
      </object>
     </void>

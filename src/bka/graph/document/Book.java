@@ -71,7 +71,11 @@ public class Book {
     
     
     public void removePage(DiagramPage page) {
+        int index = pages.indexOf(page);
         pages.remove(page);
+        if (pageIndex >= index) {
+            pageIndex--;
+        }
     }
 
 

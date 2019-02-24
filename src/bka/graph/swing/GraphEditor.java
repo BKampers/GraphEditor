@@ -714,7 +714,9 @@ public class GraphEditor extends bka.swing.FrameApplication {
                 }
                 addDiagramTab(diagramComponent);
             }
-            diagramTabbedPane.setSelectedIndex(book.getPageIndex());
+            if (book.getPageIndex() < diagramTabbedPane.getTabCount()) {
+                diagramTabbedPane.setSelectedIndex(book.getPageIndex());
+            }
             vertexTreePanel.rebuild();
             OnLoadDelegate onLoadDelegate = getOnLoadDelegate();
             if (onLoadDelegate != null) {

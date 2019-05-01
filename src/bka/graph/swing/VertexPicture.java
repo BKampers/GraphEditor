@@ -276,6 +276,7 @@ public class VertexPicture extends AbstractPicture {
         return null;
     }
 
+    
     protected Paint getFillPaint() {
         if (fillPaint == null) {
             fillPaint = getDrawStyle().createGradientPaint(AbstractPicture.DrawStyleKey.FILL, new Rectangle2D.Float(xWest(), yNorth(), size.width, size.height));
@@ -358,6 +359,19 @@ public class VertexPicture extends AbstractPicture {
             layout.draw(g2d, (float) x, (float) y);
         }
     }
+    
+    
+    protected void paintText(Graphics2D g2d, Object key, String text) {
+        TextLayout layout = getLayout(g2d, text);
+        Rectangle2D bounds = (layout != null) ? layout.getBounds() : emptyBounds(g2d);
+        double x = location.getX() - bounds.getWidth() / 2.0;
+        double y = location.getY() - bounds.getCenterY() / 2.0;
+        if (layout != null) {
+            g2d.setColor(getColor(DrawStyleKey.TEXT));
+            layout.draw(g2d, (float) x, (float) y);
+        }
+        putTextArea(key, x, y, bounds);
+    }
 
 
     protected void paintText(Graphics2D g2d, Object key, String text, int row) {
@@ -399,6 +413,7 @@ public class VertexPicture extends AbstractPicture {
             if (layout != null) {
                 bounds = layout.getBounds();
                 double y = position.getY() - layout.getBaseline();
+                g2d.setColor(getColor(DrawStyleKey.TEXT));
                 layout.draw(g2d, (float) x, (float) y);
             }
             else {

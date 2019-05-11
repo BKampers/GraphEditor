@@ -353,6 +353,7 @@ public class VertexPicture extends AbstractPicture {
     protected void paintText(Graphics2D g2d, String text, Point2D position, Map<? extends Attribute, ?> attributes) {
         TextLayout layout = getLayout(g2d, text, attributes);
         if (layout != null) {
+            g2d.setColor(getColor(DrawStyleKey.TEXT));
             Rectangle2D bounds = layout.getBounds();
             double x = position.getX() - bounds.getWidth() / 2.0;
             double y = position.getY() - bounds.getCenterY() / 2.0;
@@ -380,6 +381,7 @@ public class VertexPicture extends AbstractPicture {
         Point2D position = center(g2d, row);
         double x = position.getX() - bounds.getWidth() / 2.0;
         if (layout != null) {
+            g2d.setColor(getColor(DrawStyleKey.TEXT));
             layout.draw(g2d, (float) x, (float) position.getY() - layout.getBaseline());
         }
         putTextArea(key, x, position.getY(), bounds);

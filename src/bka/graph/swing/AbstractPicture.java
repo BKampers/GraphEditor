@@ -6,6 +6,7 @@ package bka.graph.swing;
 
 
 import bka.awt.*;
+import bka.numeric.*;
 import java.awt.*;
 import java.awt.font.*;
 import java.awt.geom.*;
@@ -105,9 +106,7 @@ public abstract class AbstractPicture {
     
     
     protected static int squareDistance(Point p, Point q) {
-        int δx = p.x - q.x;
-        int δy = p.y - q.y;
-        return δx*δx + δy*δy;
+        return Euclidean.squareDistance(q, q);
     }
 
 

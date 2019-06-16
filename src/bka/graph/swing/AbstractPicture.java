@@ -106,7 +106,9 @@ public abstract class AbstractPicture {
     
     
     protected static int squareDistance(Point p, Point q) {
-        return Euclidean.squareDistance(q, q);
+        int deltaX = p.x - q.x;
+        int deltaY = p.y - q.y;
+        return deltaX * deltaX + deltaY * deltaY;
     }
 
 

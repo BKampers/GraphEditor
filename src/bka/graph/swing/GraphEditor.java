@@ -123,7 +123,7 @@ public class GraphEditor extends bka.swing.FrameApplication {
                     newDrawStyle.setColor(key, newColor);
                     DrawStyleManager.getInstance().setDrawStyle(picture, newDrawStyle);
                     getSelectedDiagramComponent().clearHoverInfo();
-              }
+                }
             }));
         }
     }
